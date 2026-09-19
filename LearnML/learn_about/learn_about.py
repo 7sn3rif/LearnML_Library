@@ -473,201 +473,201 @@ def learn_about_KNN():
         print("- Recommending products based on similar users' purchase history.")
         print("- Detecting anomalies in network traffic by finding outlier points.")
        
-# ── Standalone values (mirror class attributes) ───────────────────
-k        = 3
-distance = "euclidean"
-fitted   = False
-
-# ── Figure Setup ──────────────────────────────────────────────────
-fig, ax = plt.subplots(figsize=(10, 13))
-fig.patch.set_facecolor("#0F172A")
-ax.set_facecolor("#0F172A")
-ax.set_xlim(0, 1)
-ax.set_ylim(0, 1)
-ax.axis("off")
-
-# ── Header ────────────────────────────────────────────────────────
-header = mpatches.FancyBboxPatch(
-    (0.12, 0.905), 0.76, 0.065,
-    boxstyle="round,pad=0.01", facecolor="#1E293B",
-    edgecolor="#38BDF8", linewidth=1.5, zorder=2)
-ax.add_patch(header)
-ax.text(0.5, 0.938, "LEARNML  |  How KNN works",
-    ha="center", va="center", fontsize=13, fontweight="bold",
-    color="#F8FAFC", fontfamily="monospace", zorder=3)
-
-# ── Hyperparameter badges ─────────────────────────────────────────
-k_text   = f"k = {k}"
-d_text   = f"dist = {distance}"
-st_text  = "fitted \u2713" if fitted else "not fitted"
-st_color = "#10B981" if fitted else "#F59E0B"
-
-for i, (label, color) in enumerate([
-    (k_text,  "#38BDF8"),
-    (d_text,  "#A855F7"),
-    (st_text, st_color),
-]):
-    bx = 0.10 + i * 0.295
-    ax.add_patch(mpatches.FancyBboxPatch(
-        (bx, 0.856), 0.265, 0.038,
-        boxstyle="round,pad=0.010", facecolor="#1E293B",
-        edgecolor=color, linewidth=1.2, zorder=2))
-    ax.text(bx + 0.1325, 0.875, label,
-        ha="center", va="center", fontsize=9.5,
-        color=color, fontfamily="monospace", zorder=3)
-
-# ── Steps ─────────────────────────────────────────────────────────
-steps = [
-    {
-        "y": 0.770,
-        "icon": "fit",
-        "title": "Memorize",
-        "idea": "No learning happens. KNN just stores the entire training set. fit() is just two lines of assignment.",
-        "math": "X_train = X          y_train = y",
-        "color": "#38BDF8", "edge": "#0284C7",
-    },
-    {
-        "y": 0.618,
-        "icon": "d()",
-        "title": "Compute Distances",
-        "idea": "For each new point x, compute its distance to every single training point using the chosen metric.",
-        "math": "distances = [dist(x, x_train)  for x_train in X_train]",
-        "color": "#A855F7", "edge": "#7E22CE",
-    },
-    {
-        "y": 0.466,
-        "icon": "↑k",
-        "title": "Get K Nearest",
-        "idea": "Sort all distances ascending and slice the first k indices — those are the k closest neighbors.",
-        "math": "k_indices = np.argsort(distances)[:k]",
-        "color": "#EC4899", "edge": "#BE185D",
-    },
-    {
-        "y": 0.314,
-        "icon": "y[]",
-        "title": "Collect Labels",
-        "idea": "Look up the true label of each of the k nearest neighbors from the stored training labels.",
-        "math": "k_labels = [y_train[i]  for i in k_indices]",
-        "color": "#F59E0B", "edge": "#B45309",
-    },
-    {
-        "y": 0.162,
-        "icon": "vote",
-        "title": "Majority Vote",
-        "idea": "The most common label among k neighbors wins. bincount for integers, Counter as fallback for strings.",
-        "math": "np.bincount(k_labels).argmax()   |   Counter(k_labels).most_common(1)",
-        "color": "#FB923C", "edge": "#C2410C",
-    },
-]
-
-card_w = 0.68
-card_h = 0.112
-gap    = 0.010
-icon_r = 0.038
-
-for step in steps:
-    cy = step["y"]
-    x0 = 0.5 - card_w / 2
-    y0 = cy - card_h / 2
-
-    # Shadow
-    ax.add_patch(mpatches.FancyBboxPatch(
-        (x0 + 0.007, y0 - 0.007), card_w, card_h,
-        boxstyle="round,pad=0.014", facecolor="#000000",
-        edgecolor="none", alpha=0.35, zorder=2))
-
-    # Card
-    ax.add_patch(mpatches.FancyBboxPatch(
-        (x0, y0), card_w, card_h,
-        boxstyle="round,pad=0.014", facecolor="#1E293B",
-        edgecolor=step["edge"], linewidth=1.8, zorder=3))
-
-    # Icon circle
-    icon_x = x0 + 0.056
-    ax.add_patch(plt.Circle(
-        (icon_x, cy), icon_r,
-        facecolor=step["edge"], zorder=4))
-    ax.text(icon_x, cy, step["icon"],
-        ha="center", va="center", fontsize=8, fontweight="bold",
-        color="#F8FAFC", fontfamily="monospace", zorder=5)
-
-    # Title
-    ax.text(x0 + 0.115, cy + 0.034, step["title"],
-        ha="left", va="center", fontsize=12, fontweight="bold",
-        color=step["color"], fontfamily="sans-serif", zorder=5)
-
-    # Plain English
-    ax.text(x0 + 0.115, cy + 0.006, step["idea"],
-        ha="left", va="center", fontsize=9, color="#CBD5E1",
-        fontfamily="sans-serif", zorder=5)
-
-    # Divider
-    ax.plot(
-        [x0 + 0.115, x0 + card_w - 0.018],
-        [cy - 0.018, cy - 0.018],
-        color="#2D3748", lw=0.8, zorder=4)
-
-    # Math
-    ax.text(x0 + 0.115, cy - 0.036, step["math"],
-        ha="left", va="center", fontsize=9,
-        color="#64748B", fontfamily="monospace", zorder=5)
-
-# ── Vertical arrows ───────────────────────────────────────────────
-for i in range(len(steps) - 1):
-    y_start = steps[i]["y"]     - card_h / 2 - gap
-    y_end   = steps[i + 1]["y"] + card_h / 2 + gap
-    ax.annotate("", xy=(0.5, y_end), xytext=(0.5, y_start),
-        arrowprops=dict(arrowstyle="-|>", color="#475569",
-                        lw=1.8, mutation_scale=16), zorder=3)
-
-# ── Per-query-point loop arc (Step 5 → Step 2) ───────────────────
-s_start = steps[4]["y"]
-s_mid   = steps[2]["y"]
-s_end   = steps[1]["y"]
-arc_x   = 0.87
-
-verts = [(arc_x, s_start), (arc_x + 0.08, s_mid), (arc_x, s_end)]
-codes = [Path.MOVETO, Path.CURVE3, Path.CURVE3]
-ax.add_patch(mpatches.PathPatch(
-    Path(verts, codes), facecolor="none",
-    edgecolor="#F59E0B", linewidth=2,
-    linestyle=(0, (5, 4)), zorder=3))
-
-ax.annotate("", xy=(arc_x + 0.002, s_end),
-    xytext=(arc_x + 0.022, s_end + 0.038),
-    arrowprops=dict(arrowstyle="-|>", color="#F59E0B",
-                    lw=1.5, mutation_scale=13), zorder=4)
-
-mid_y = (s_start + s_end) / 2
-ax.text(arc_x + 0.090, mid_y + 0.022, "Per query\npoint",
-    ha="left", va="center", fontsize=9, fontweight="bold",
-    color="#F59E0B", fontfamily="sans-serif", zorder=5)
-ax.text(arc_x + 0.090, mid_y - 0.030, "x len(X)\nqueries",
-    ha="left", va="center", fontsize=8.5,
-    color="#64748B", fontfamily="sans-serif", zorder=5)
-
-# ── Status bar ────────────────────────────────────────────────────
-status = "Call  model.fit(X, y)  to load the training data"
-color  = "#F59E0B"
-edge   = "#B45309"
-bg     = "#1c1008"
-
-ax.add_patch(mpatches.FancyBboxPatch(
-    (0.08, 0.022), 0.84, 0.052,
-    boxstyle="round,pad=0.010", facecolor=bg,
-    edgecolor=edge, linewidth=1.2, zorder=2))
-ax.text(0.5, 0.048, status,
-    ha="center", va="center", fontsize=10,
-    color=color, fontfamily="monospace", zorder=3)
-
-plt.tight_layout()
-plt.show()
-   
-    
-
-
-
-
+        # ── Standalone values (mirror class attributes) ───────────────────
+        k        = 3
+        distance = "euclidean"
+        fitted   = False
+        
+        # ── Figure Setup ──────────────────────────────────────────────────
+        fig, ax = plt.subplots(figsize=(10, 13))
+        fig.patch.set_facecolor("#0F172A")
+        ax.set_facecolor("#0F172A")
+        ax.set_xlim(0, 1)
+        ax.set_ylim(0, 1)
+        ax.axis("off")
+        
+        # ── Header ────────────────────────────────────────────────────────
+        header = mpatches.FancyBboxPatch(
+            (0.12, 0.905), 0.76, 0.065,
+            boxstyle="round,pad=0.01", facecolor="#1E293B",
+            edgecolor="#38BDF8", linewidth=1.5, zorder=2)
+        ax.add_patch(header)
+        ax.text(0.5, 0.938, "LEARNML  |  How KNN works",
+            ha="center", va="center", fontsize=13, fontweight="bold",
+            color="#F8FAFC", fontfamily="monospace", zorder=3)
+        
+        # ── Hyperparameter badges ─────────────────────────────────────────
+        k_text   = f"k = {k}"
+        d_text   = f"dist = {distance}"
+        st_text  = "fitted \u2713" if fitted else "not fitted"
+        st_color = "#10B981" if fitted else "#F59E0B"
+        
+        for i, (label, color) in enumerate([
+            (k_text,  "#38BDF8"),
+            (d_text,  "#A855F7"),
+            (st_text, st_color),
+        ]):
+            bx = 0.10 + i * 0.295
+            ax.add_patch(mpatches.FancyBboxPatch(
+                (bx, 0.856), 0.265, 0.038,
+                boxstyle="round,pad=0.010", facecolor="#1E293B",
+                edgecolor=color, linewidth=1.2, zorder=2))
+            ax.text(bx + 0.1325, 0.875, label,
+                ha="center", va="center", fontsize=9.5,
+                color=color, fontfamily="monospace", zorder=3)
+        
+        # ── Steps ─────────────────────────────────────────────────────────
+        steps = [
+            {
+                "y": 0.770,
+                "icon": "fit",
+                "title": "Memorize",
+                "idea": "No learning happens. KNN just stores the entire training set. fit() is just two lines of assignment.",
+                "math": "X_train = X          y_train = y",
+                "color": "#38BDF8", "edge": "#0284C7",
+            },
+            {
+                "y": 0.618,
+                "icon": "d()",
+                "title": "Compute Distances",
+                "idea": "For each new point x, compute its distance to every single training point using the chosen metric.",
+                "math": "distances = [dist(x, x_train)  for x_train in X_train]",
+                "color": "#A855F7", "edge": "#7E22CE",
+            },
+            {
+                "y": 0.466,
+                "icon": "↑k",
+                "title": "Get K Nearest",
+                "idea": "Sort all distances ascending and slice the first k indices — those are the k closest neighbors.",
+                "math": "k_indices = np.argsort(distances)[:k]",
+                "color": "#EC4899", "edge": "#BE185D",
+            },
+            {
+                "y": 0.314,
+                "icon": "y[]",
+                "title": "Collect Labels",
+                "idea": "Look up the true label of each of the k nearest neighbors from the stored training labels.",
+                "math": "k_labels = [y_train[i]  for i in k_indices]",
+                "color": "#F59E0B", "edge": "#B45309",
+            },
+            {
+                "y": 0.162,
+                "icon": "vote",
+                "title": "Majority Vote",
+                "idea": "The most common label among k neighbors wins. bincount for integers, Counter as fallback for strings.",
+                "math": "np.bincount(k_labels).argmax()   |   Counter(k_labels).most_common(1)",
+                "color": "#FB923C", "edge": "#C2410C",
+            },
+        ]
+        
+        card_w = 0.68
+        card_h = 0.112
+        gap    = 0.010
+        icon_r = 0.038
+        
+        for step in steps:
+            cy = step["y"]
+            x0 = 0.5 - card_w / 2
+            y0 = cy - card_h / 2
+        
+            # Shadow
+            ax.add_patch(mpatches.FancyBboxPatch(
+                (x0 + 0.007, y0 - 0.007), card_w, card_h,
+                boxstyle="round,pad=0.014", facecolor="#000000",
+                edgecolor="none", alpha=0.35, zorder=2))
+        
+            # Card
+            ax.add_patch(mpatches.FancyBboxPatch(
+                (x0, y0), card_w, card_h,
+                boxstyle="round,pad=0.014", facecolor="#1E293B",
+                edgecolor=step["edge"], linewidth=1.8, zorder=3))
+        
+            # Icon circle
+            icon_x = x0 + 0.056
+            ax.add_patch(plt.Circle(
+                (icon_x, cy), icon_r,
+                facecolor=step["edge"], zorder=4))
+            ax.text(icon_x, cy, step["icon"],
+                ha="center", va="center", fontsize=8, fontweight="bold",
+                color="#F8FAFC", fontfamily="monospace", zorder=5)
+        
+            # Title
+            ax.text(x0 + 0.115, cy + 0.034, step["title"],
+                ha="left", va="center", fontsize=12, fontweight="bold",
+                color=step["color"], fontfamily="sans-serif", zorder=5)
+        
+            # Plain English
+            ax.text(x0 + 0.115, cy + 0.006, step["idea"],
+                ha="left", va="center", fontsize=9, color="#CBD5E1",
+                fontfamily="sans-serif", zorder=5)
+        
+            # Divider
+            ax.plot(
+                [x0 + 0.115, x0 + card_w - 0.018],
+                [cy - 0.018, cy - 0.018],
+                color="#2D3748", lw=0.8, zorder=4)
+        
+            # Math
+            ax.text(x0 + 0.115, cy - 0.036, step["math"],
+                ha="left", va="center", fontsize=9,
+                color="#64748B", fontfamily="monospace", zorder=5)
+        
+        # ── Vertical arrows ───────────────────────────────────────────────
+        for i in range(len(steps) - 1):
+            y_start = steps[i]["y"]     - card_h / 2 - gap
+            y_end   = steps[i + 1]["y"] + card_h / 2 + gap
+            ax.annotate("", xy=(0.5, y_end), xytext=(0.5, y_start),
+                arrowprops=dict(arrowstyle="-|>", color="#475569",
+                                lw=1.8, mutation_scale=16), zorder=3)
+        
+        # ── Per-query-point loop arc (Step 5 → Step 2) ───────────────────
+        s_start = steps[4]["y"]
+        s_mid   = steps[2]["y"]
+        s_end   = steps[1]["y"]
+        arc_x   = 0.87
+        
+        verts = [(arc_x, s_start), (arc_x + 0.08, s_mid), (arc_x, s_end)]
+        codes = [Path.MOVETO, Path.CURVE3, Path.CURVE3]
+        ax.add_patch(mpatches.PathPatch(
+            Path(verts, codes), facecolor="none",
+            edgecolor="#F59E0B", linewidth=2,
+            linestyle=(0, (5, 4)), zorder=3))
+        
+        ax.annotate("", xy=(arc_x + 0.002, s_end),
+            xytext=(arc_x + 0.022, s_end + 0.038),
+            arrowprops=dict(arrowstyle="-|>", color="#F59E0B",
+                            lw=1.5, mutation_scale=13), zorder=4)
+        
+        mid_y = (s_start + s_end) / 2
+        ax.text(arc_x + 0.090, mid_y + 0.022, "Per query\npoint",
+            ha="left", va="center", fontsize=9, fontweight="bold",
+            color="#F59E0B", fontfamily="sans-serif", zorder=5)
+        ax.text(arc_x + 0.090, mid_y - 0.030, "x len(X)\nqueries",
+            ha="left", va="center", fontsize=8.5,
+            color="#64748B", fontfamily="sans-serif", zorder=5)
+        
+        # ── Status bar ────────────────────────────────────────────────────
+        status = "Call  model.fit(X, y)  to load the training data"
+        color  = "#F59E0B"
+        edge   = "#B45309"
+        bg     = "#1c1008"
+        
+        ax.add_patch(mpatches.FancyBboxPatch(
+            (0.08, 0.022), 0.84, 0.052,
+            boxstyle="round,pad=0.010", facecolor=bg,
+            edgecolor=edge, linewidth=1.2, zorder=2))
+        ax.text(0.5, 0.048, status,
+            ha="center", va="center", fontsize=10,
+            color=color, fontfamily="monospace", zorder=3)
+        
+        plt.tight_layout()
+        plt.show()
+           
+            
+        
+        
+        
+        
 
 
 
