@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from matplotlib.patches import FancyBboxPatch, FancyArrowPatch
 import matplotlib.patheffects as pe
+import matplotlib.path as Path
 
 
 class LinearRegression:
@@ -21,6 +22,7 @@ class LinearRegression:
     for _ in range(self.n_iters):
       y_predicted = np.dot(X, self.weights) + self.bias
       #minimize the loss function using gradient descent
+      #The error for each parameter (weight or bias) in the model by taking the derivative of the loss function with respect to that parameter. The gradients indicate the direction and magnitude of change needed to minimize the loss.   
       dw = (1/n_samples) * np.dot(X.T, (y_predicted - y))
       db = (1/n_samples) * np.sum(y_predicted - y)
       #update parameters
@@ -198,177 +200,173 @@ class PolynomialRegression:
         #the rest of the code is for visualization purposes, and it is not part of the core algorithm.
 
         #graphical representation of the polynomial regression training pipeline, illustrating the steps involved in the process.
-        import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
-from matplotlib.path import Path
-import numpy as np
-
-fig, ax = plt.subplots(figsize=(9, 12))
-fig.patch.set_facecolor("#0F172A")
-ax.set_facecolor("#0F172A")
-ax.set_xlim(0, 1)
-ax.set_ylim(0, 1)
-ax.axis("off")
-
-# ── Header ───────────────────────────────────────────────────────────
-header = mpatches.FancyBboxPatch((0.12, 0.918), 0.76, 0.062,
-    boxstyle="round,pad=0.012", facecolor="#1E293B",
-    edgecolor="#A855F7", linewidth=1.8, zorder=2)
-ax.add_patch(header)
-ax.text(0.5, 0.949, "LEARNML  |  Polynomial Regression Pipeline",
-    ha="center", va="center", fontsize=13, fontweight="bold",
-    color="#F8FAFC", fontfamily="monospace", zorder=3)
-
-# ── Steps ─────────────────────────────────────────────────────────────
-steps = [
-    {
-        "y": 0.830,
-        "title": "1. Initialize Parameters",
-        "sub": "w = zeros()  |  b = 0.0  |  degree = d",
-        "color": "#38BDF8", "edge": "#0284C7",
-    },
-    {
-        "y": 0.672,
-        "title": "2. Polynomial Feature Expansion",
-        "sub": "X_poly[:, d-1] = X.flatten() ** d   →   [x, x², x³, ..., xᵈ]",
-        "color": "#A855F7", "edge": "#7E22CE",
-    },
-    {
-        "y": 0.514,
-        "title": "3. Forward Prediction",
-        "sub": "y_pred = X_poly · w + b",
-        "color": "#EC4899", "edge": "#BE185D",
-    },
-    {
-        "y": 0.356,
-        "title": "4. Compute MSE Loss",
-        "sub": "J(w,b) = (1/2m) Σ (y_pred − y)²",
-        "color": "#F59E0B", "edge": "#B45309",
-    },
-    {
-        "y": 0.198,
-        "title": "5. Compute Gradients & Update",
-        "sub": "w -= α·∂J/∂w   |   b -= α·∂J/∂b",
-        "color": "#FB923C", "edge": "#C2410C",
-    },
-    {
-        "y": 0.062,
-        "title": "6. Training Complete",
-        "sub": "Polynomial model converged — optimal weights saved",
-        "color": "#10B981", "edge": "#059669",
-    },
-]
-
-card_w, card_h = 0.64, 0.090
-gap = 0.011
-
-for step in steps:
-    cy = step["y"]
-    x0 = 0.5 - card_w / 2
-    y0 = cy - card_h / 2
-
-    # Shadow
-    shadow = mpatches.FancyBboxPatch((x0 + 0.006, y0 - 0.006), card_w, card_h,
-        boxstyle="round,pad=0.012", facecolor="#000000",
-        edgecolor="none", alpha=0.35, zorder=2)
-    ax.add_patch(shadow)
-
-    # Card
-    card = mpatches.FancyBboxPatch((x0, y0), card_w, card_h,
-        boxstyle="round,pad=0.012", facecolor="#1E293B",
-        edgecolor=step["edge"], linewidth=2, zorder=3)
-    ax.add_patch(card)
-
-    # Left accent bar
-    accent = mpatches.FancyBboxPatch((x0, y0), 0.013, card_h,
-        boxstyle="round,pad=0.0", facecolor=step["color"],
-        edgecolor="none", zorder=4)
-    ax.add_patch(accent)
-
-    # Title
-    ax.text(0.5, cy + 0.020, step["title"],
-        ha="center", va="center", fontsize=11.5, fontweight="bold",
-        color=step["color"], fontfamily="sans-serif", zorder=5)
-
-    # Subtitle
-    ax.text(0.5, cy - 0.022, step["sub"],
-        ha="center", va="center", fontsize=9.5,
-        color="#94A3B8", fontfamily="monospace", zorder=5)
-
-# ── Vertical arrows ───────────────────────────────────────────────────
-for i in range(len(steps) - 1):
-    y_start = steps[i]["y"]   - card_h / 2 - gap
-    y_end   = steps[i+1]["y"] + card_h / 2 + gap
-    ax.annotate("", xy=(0.5, y_end), xytext=(0.5, y_start),
-        arrowprops=dict(arrowstyle="-|>", color="#475569",
-                        lw=1.8, mutation_scale=16), zorder=3)
-
-# ── Degree annotation on step 2 (highlight the key difference) ───────
-ax.text(0.845, steps[1]["y"] + 0.014, "NEW",
-    ha="center", va="center", fontsize=8, fontweight="bold",
-    color="#0F172A", fontfamily="monospace",
-    bbox=dict(boxstyle="round,pad=0.3", facecolor="#A855F7",
-              edgecolor="none"), zorder=6)
-
-# ── Epoch loop arc (Step 5 → Step 3) ─────────────────────────────────
-verts = [
-    (0.818, steps[4]["y"]),       # start: right edge of step 5
-    (0.970, steps[3]["y"]),       # bezier control point
-    (0.818, steps[2]["y"]),       # end: right edge of step 3
-]
-codes = [Path.MOVETO, Path.CURVE3, Path.CURVE3]
-path = Path(verts, codes)
-loop_patch = mpatches.PathPatch(path, facecolor="none",
-    edgecolor="#F59E0B", linewidth=2,
-    linestyle=(0, (5, 4)), zorder=3)
-ax.add_patch(loop_patch)
-
-# Arrowhead at end of arc
-ax.annotate("", xy=(0.820, steps[2]["y"]),
-    xytext=(0.845, steps[2]["y"] + 0.032),
-    arrowprops=dict(arrowstyle="-|>", color="#F59E0B",
-                    lw=1.5, mutation_scale=14), zorder=4)
-
-# Loop label
-ax.text(0.978, steps[3]["y"] + 0.030, "Epoch\nLoop",
-    ha="left", va="center", fontsize=9.5, fontweight="bold",
-    color="#F59E0B", fontfamily="monospace", zorder=5)
-ax.text(0.978, steps[3]["y"] - 0.020, "until\nconvergence",
-    ha="left", va="center", fontsize=8.5,
-    color="#64748B", fontfamily="monospace", zorder=5)
-
-# ── Degree loop arc (Step 2 internal: d = 1 → degree) ────────────────
-d_x = 0.175
-d_y_top = steps[1]["y"] + card_h / 2 - 0.005
-d_y_bot = steps[1]["y"] - card_h / 2 + 0.005
-
-verts2 = [
-    (d_x + 0.01, d_y_top),
-    (d_x - 0.09, steps[1]["y"]),
-    (d_x + 0.01, d_y_bot),
-]
-codes2 = [Path.MOVETO, Path.CURVE3, Path.CURVE3]
-path2 = Path(verts2, codes2)
-degree_patch = mpatches.PathPatch(path2, facecolor="none",
-    edgecolor="#A855F7", linewidth=1.5,
-    linestyle=(0, (4, 3)), zorder=3)
-ax.add_patch(degree_patch)
-
-ax.annotate("", xy=(d_x + 0.008, d_y_bot),
-    xytext=(d_x - 0.015, d_y_bot + 0.025),
-    arrowprops=dict(arrowstyle="-|>", color="#A855F7",
-                    lw=1.2, mutation_scale=12), zorder=4)
-
-ax.text(0.055, steps[1]["y"], "for d in\nrange(1,\ndegree+1)",
-    ha="center", va="center", fontsize=8,
-    color="#A855F7", fontfamily="monospace", zorder=5)
-
-plt.tight_layout()
-plt.savefig("polynomial_regression_pipeline.png", dpi=150,
-            bbox_inches="tight", facecolor="#0F172A")
-plt.show()
-
-
-def predict(self, X):
-        X_poly = self._polynomial_features(X)
-        return self.linear_regression.predict(X_poly)
+        fig, ax = plt.subplots(figsize=(9, 12))
+        fig.patch.set_facecolor("#0F172A")
+        ax.set_facecolor("#0F172A")
+        ax.set_xlim(0, 1)
+        ax.set_ylim(0, 1)
+        ax.axis("off")
+        
+        # ── Header ───────────────────────────────────────────────────────────
+        header = mpatches.FancyBboxPatch((0.12, 0.918), 0.76, 0.062,
+            boxstyle="round,pad=0.012", facecolor="#1E293B",
+            edgecolor="#A855F7", linewidth=1.8, zorder=2)
+        ax.add_patch(header)
+        ax.text(0.5, 0.949, "LEARNML  |  Polynomial Regression Pipeline",
+            ha="center", va="center", fontsize=13, fontweight="bold",
+            color="#F8FAFC", fontfamily="monospace", zorder=3)
+        
+        # ── Steps ─────────────────────────────────────────────────────────────
+        steps = [
+            {
+                "y": 0.830,
+                "title": "1. Initialize Parameters",
+                "sub": "w = zeros()  |  b = 0.0  |  degree = d",
+                "color": "#38BDF8", "edge": "#0284C7",
+            },
+            {
+                "y": 0.672,
+                "title": "2. Polynomial Feature Expansion",
+                "sub": "X_poly[:, d-1] = X.flatten() ** d   →   [x, x², x³, ..., xᵈ]",
+                "color": "#A855F7", "edge": "#7E22CE",
+            },
+            {
+                "y": 0.514,
+                "title": "3. Forward Prediction",
+                "sub": "y_pred = X_poly · w + b",
+                "color": "#EC4899", "edge": "#BE185D",
+            },
+            {
+                "y": 0.356,
+                "title": "4. Compute MSE Loss",
+                "sub": "J(w,b) = (1/2m) Σ (y_pred − y)²",
+                "color": "#F59E0B", "edge": "#B45309",
+            },
+            {
+                "y": 0.198,
+                "title": "5. Compute Gradients & Update",
+                "sub": "w -= α·∂J/∂w   |   b -= α·∂J/∂b",
+                "color": "#FB923C", "edge": "#C2410C",
+            },
+            {
+                "y": 0.062,
+                "title": "6. Training Complete",
+                "sub": "Polynomial model converged — optimal weights saved",
+                "color": "#10B981", "edge": "#059669",
+            },
+        ]
+        
+        card_w, card_h = 0.64, 0.090
+        gap = 0.011
+        
+        for step in steps:
+            cy = step["y"]
+            x0 = 0.5 - card_w / 2
+            y0 = cy - card_h / 2
+        
+            # Shadow
+            shadow = mpatches.FancyBboxPatch((x0 + 0.006, y0 - 0.006), card_w, card_h,
+                boxstyle="round,pad=0.012", facecolor="#000000",
+                edgecolor="none", alpha=0.35, zorder=2)
+            ax.add_patch(shadow)
+        
+            # Card
+            card = mpatches.FancyBboxPatch((x0, y0), card_w, card_h,
+                boxstyle="round,pad=0.012", facecolor="#1E293B",
+                edgecolor=step["edge"], linewidth=2, zorder=3)
+            ax.add_patch(card)
+        
+            # Left accent bar
+            accent = mpatches.FancyBboxPatch((x0, y0), 0.013, card_h,
+                boxstyle="round,pad=0.0", facecolor=step["color"],
+                edgecolor="none", zorder=4)
+            ax.add_patch(accent)
+        
+            # Title
+            ax.text(0.5, cy + 0.020, step["title"],
+                ha="center", va="center", fontsize=11.5, fontweight="bold",
+                color=step["color"], fontfamily="sans-serif", zorder=5)
+        
+            # Subtitle
+            ax.text(0.5, cy - 0.022, step["sub"],
+                ha="center", va="center", fontsize=9.5,
+                color="#94A3B8", fontfamily="monospace", zorder=5)
+        
+        # ── Vertical arrows ───────────────────────────────────────────────────
+        for i in range(len(steps) - 1):
+            y_start = steps[i]["y"]   - card_h / 2 - gap
+            y_end   = steps[i+1]["y"] + card_h / 2 + gap
+            ax.annotate("", xy=(0.5, y_end), xytext=(0.5, y_start),
+                arrowprops=dict(arrowstyle="-|>", color="#475569",
+                                lw=1.8, mutation_scale=16), zorder=3)
+        
+        # ── Degree annotation on step 2 (highlight the key difference) ───────
+        ax.text(0.845, steps[1]["y"] + 0.014, "NEW",
+            ha="center", va="center", fontsize=8, fontweight="bold",
+            color="#0F172A", fontfamily="monospace",
+            bbox=dict(boxstyle="round,pad=0.3", facecolor="#A855F7",
+                      edgecolor="none"), zorder=6)
+        
+        # ── Epoch loop arc (Step 5 → Step 3) ─────────────────────────────────
+        verts = [
+            (0.818, steps[4]["y"]),       # start: right edge of step 5
+            (0.970, steps[3]["y"]),       # bezier control point
+            (0.818, steps[2]["y"]),       # end: right edge of step 3
+        ]
+        codes = [Path.MOVETO, Path.CURVE3, Path.CURVE3]
+        path = Path(verts, codes)
+        loop_patch = mpatches.PathPatch(path, facecolor="none",
+            edgecolor="#F59E0B", linewidth=2,
+            linestyle=(0, (5, 4)), zorder=3)
+        ax.add_patch(loop_patch)
+        
+        # Arrowhead at end of arc
+        ax.annotate("", xy=(0.820, steps[2]["y"]),
+            xytext=(0.845, steps[2]["y"] + 0.032),
+            arrowprops=dict(arrowstyle="-|>", color="#F59E0B",
+                            lw=1.5, mutation_scale=14), zorder=4)
+        
+        # Loop label
+        ax.text(0.978, steps[3]["y"] + 0.030, "Epoch\nLoop",
+            ha="left", va="center", fontsize=9.5, fontweight="bold",
+            color="#F59E0B", fontfamily="monospace", zorder=5)
+        ax.text(0.978, steps[3]["y"] - 0.020, "until\nconvergence",
+            ha="left", va="center", fontsize=8.5,
+            color="#64748B", fontfamily="monospace", zorder=5)
+        
+        # ── Degree loop arc (Step 2 internal: d = 1 → degree) ────────────────
+        d_x = 0.175
+        d_y_top = steps[1]["y"] + card_h / 2 - 0.005
+        d_y_bot = steps[1]["y"] - card_h / 2 + 0.005
+        
+        verts2 = [
+            (d_x + 0.01, d_y_top),
+            (d_x - 0.09, steps[1]["y"]),
+            (d_x + 0.01, d_y_bot),
+        ]
+        codes2 = [Path.MOVETO, Path.CURVE3, Path.CURVE3]
+        path2 = Path(verts2, codes2)
+        degree_patch = mpatches.PathPatch(path2, facecolor="none",
+            edgecolor="#A855F7", linewidth=1.5,
+            linestyle=(0, (4, 3)), zorder=3)
+        ax.add_patch(degree_patch)
+        
+        ax.annotate("", xy=(d_x + 0.008, d_y_bot),
+            xytext=(d_x - 0.015, d_y_bot + 0.025),
+            arrowprops=dict(arrowstyle="-|>", color="#A855F7",
+                            lw=1.2, mutation_scale=12), zorder=4)
+        
+        ax.text(0.055, steps[1]["y"], "for d in\nrange(1,\ndegree+1)",
+            ha="center", va="center", fontsize=8,
+            color="#A855F7", fontfamily="monospace", zorder=5)
+        
+        plt.tight_layout()
+        plt.savefig("polynomial_regression_pipeline.png", dpi=150,
+                    bbox_inches="tight", facecolor="#0F172A")
+        plt.show()
+        
+        
+    def predict(self, X):
+             X_poly = self._polynomial_features(X)
+             return self.linear_regression.predict(X_poly)
+     

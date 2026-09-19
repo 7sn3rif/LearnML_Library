@@ -462,19 +462,232 @@ def learn_about_PolynomialRegression():
 def learn_about_KNN():
 
     # ── Learn About KNN ───────────────────────────────────────────────
-    print("KNN (K-Nearest Neighbors) is a simple, non-parametric supervised learning algorithm that makes predictions by finding the K closest training points to a new input and taking a majority vote (classification) or average (regression). Unlike other algorithms, KNN has no training phase — it memorizes the data and does all the work at prediction time.")
+        print("KNN (K-Nearest Neighbors) is a simple, non-parametric supervised learning algorithm that makes predictions by finding the K closest training points to a new input and taking a majority vote (classification) or average (regression). Unlike other algorithms, KNN has no training phase — it memorizes the data and does all the work at prediction time.")
+        print("\nKey Concepts:")
+        print("1. Distance Metric: KNN measures closeness using Euclidean, Manhattan, or Minkowski distance. The choice of metric affects which neighbors are selected.")
+        print("2. K Value: K controls how many neighbors vote. Small K = flexible but noisy. Large K = smooth but less sensitive to local patterns.")
+        print("3. No Training Phase: KNN just memorizes the data — fit() only stores X and y. Prediction is where all the computation happens.")
+        print("4. Majority Vote: The most common label among the K neighbors wins. For ties, the first-found label is returned.")
+        print("\nApplications:")
+        print("- Classifying tumors as malignant or benign based on cell features.")
+        print("- Recommending products based on similar users' purchase history.")
+        print("- Detecting anomalies in network traffic by finding outlier points.")
+       
+# ── Standalone values (mirror class attributes) ───────────────────
+k        = 3
+distance = "euclidean"
+fitted   = False
+
+# ── Figure Setup ──────────────────────────────────────────────────
+fig, ax = plt.subplots(figsize=(10, 13))
+fig.patch.set_facecolor("#0F172A")
+ax.set_facecolor("#0F172A")
+ax.set_xlim(0, 1)
+ax.set_ylim(0, 1)
+ax.axis("off")
+
+# ── Header ────────────────────────────────────────────────────────
+header = mpatches.FancyBboxPatch(
+    (0.12, 0.905), 0.76, 0.065,
+    boxstyle="round,pad=0.01", facecolor="#1E293B",
+    edgecolor="#38BDF8", linewidth=1.5, zorder=2)
+ax.add_patch(header)
+ax.text(0.5, 0.938, "LEARNML  |  How KNN works",
+    ha="center", va="center", fontsize=13, fontweight="bold",
+    color="#F8FAFC", fontfamily="monospace", zorder=3)
+
+# ── Hyperparameter badges ─────────────────────────────────────────
+k_text   = f"k = {k}"
+d_text   = f"dist = {distance}"
+st_text  = "fitted \u2713" if fitted else "not fitted"
+st_color = "#10B981" if fitted else "#F59E0B"
+
+for i, (label, color) in enumerate([
+    (k_text,  "#38BDF8"),
+    (d_text,  "#A855F7"),
+    (st_text, st_color),
+]):
+    bx = 0.10 + i * 0.295
+    ax.add_patch(mpatches.FancyBboxPatch(
+        (bx, 0.856), 0.265, 0.038,
+        boxstyle="round,pad=0.010", facecolor="#1E293B",
+        edgecolor=color, linewidth=1.2, zorder=2))
+    ax.text(bx + 0.1325, 0.875, label,
+        ha="center", va="center", fontsize=9.5,
+        color=color, fontfamily="monospace", zorder=3)
+
+# ── Steps ─────────────────────────────────────────────────────────
+steps = [
+    {
+        "y": 0.770,
+        "icon": "fit",
+        "title": "Memorize",
+        "idea": "No learning happens. KNN just stores the entire training set. fit() is just two lines of assignment.",
+        "math": "X_train = X          y_train = y",
+        "color": "#38BDF8", "edge": "#0284C7",
+    },
+    {
+        "y": 0.618,
+        "icon": "d()",
+        "title": "Compute Distances",
+        "idea": "For each new point x, compute its distance to every single training point using the chosen metric.",
+        "math": "distances = [dist(x, x_train)  for x_train in X_train]",
+        "color": "#A855F7", "edge": "#7E22CE",
+    },
+    {
+        "y": 0.466,
+        "icon": "↑k",
+        "title": "Get K Nearest",
+        "idea": "Sort all distances ascending and slice the first k indices — those are the k closest neighbors.",
+        "math": "k_indices = np.argsort(distances)[:k]",
+        "color": "#EC4899", "edge": "#BE185D",
+    },
+    {
+        "y": 0.314,
+        "icon": "y[]",
+        "title": "Collect Labels",
+        "idea": "Look up the true label of each of the k nearest neighbors from the stored training labels.",
+        "math": "k_labels = [y_train[i]  for i in k_indices]",
+        "color": "#F59E0B", "edge": "#B45309",
+    },
+    {
+        "y": 0.162,
+        "icon": "vote",
+        "title": "Majority Vote",
+        "idea": "The most common label among k neighbors wins. bincount for integers, Counter as fallback for strings.",
+        "math": "np.bincount(k_labels).argmax()   |   Counter(k_labels).most_common(1)",
+        "color": "#FB923C", "edge": "#C2410C",
+    },
+]
+
+card_w = 0.68
+card_h = 0.112
+gap    = 0.010
+icon_r = 0.038
+
+for step in steps:
+    cy = step["y"]
+    x0 = 0.5 - card_w / 2
+    y0 = cy - card_h / 2
+
+    # Shadow
+    ax.add_patch(mpatches.FancyBboxPatch(
+        (x0 + 0.007, y0 - 0.007), card_w, card_h,
+        boxstyle="round,pad=0.014", facecolor="#000000",
+        edgecolor="none", alpha=0.35, zorder=2))
+
+    # Card
+    ax.add_patch(mpatches.FancyBboxPatch(
+        (x0, y0), card_w, card_h,
+        boxstyle="round,pad=0.014", facecolor="#1E293B",
+        edgecolor=step["edge"], linewidth=1.8, zorder=3))
+
+    # Icon circle
+    icon_x = x0 + 0.056
+    ax.add_patch(plt.Circle(
+        (icon_x, cy), icon_r,
+        facecolor=step["edge"], zorder=4))
+    ax.text(icon_x, cy, step["icon"],
+        ha="center", va="center", fontsize=8, fontweight="bold",
+        color="#F8FAFC", fontfamily="monospace", zorder=5)
+
+    # Title
+    ax.text(x0 + 0.115, cy + 0.034, step["title"],
+        ha="left", va="center", fontsize=12, fontweight="bold",
+        color=step["color"], fontfamily="sans-serif", zorder=5)
+
+    # Plain English
+    ax.text(x0 + 0.115, cy + 0.006, step["idea"],
+        ha="left", va="center", fontsize=9, color="#CBD5E1",
+        fontfamily="sans-serif", zorder=5)
+
+    # Divider
+    ax.plot(
+        [x0 + 0.115, x0 + card_w - 0.018],
+        [cy - 0.018, cy - 0.018],
+        color="#2D3748", lw=0.8, zorder=4)
+
+    # Math
+    ax.text(x0 + 0.115, cy - 0.036, step["math"],
+        ha="left", va="center", fontsize=9,
+        color="#64748B", fontfamily="monospace", zorder=5)
+
+# ── Vertical arrows ───────────────────────────────────────────────
+for i in range(len(steps) - 1):
+    y_start = steps[i]["y"]     - card_h / 2 - gap
+    y_end   = steps[i + 1]["y"] + card_h / 2 + gap
+    ax.annotate("", xy=(0.5, y_end), xytext=(0.5, y_start),
+        arrowprops=dict(arrowstyle="-|>", color="#475569",
+                        lw=1.8, mutation_scale=16), zorder=3)
+
+# ── Per-query-point loop arc (Step 5 → Step 2) ───────────────────
+s_start = steps[4]["y"]
+s_mid   = steps[2]["y"]
+s_end   = steps[1]["y"]
+arc_x   = 0.87
+
+verts = [(arc_x, s_start), (arc_x + 0.08, s_mid), (arc_x, s_end)]
+codes = [Path.MOVETO, Path.CURVE3, Path.CURVE3]
+ax.add_patch(mpatches.PathPatch(
+    Path(verts, codes), facecolor="none",
+    edgecolor="#F59E0B", linewidth=2,
+    linestyle=(0, (5, 4)), zorder=3))
+
+ax.annotate("", xy=(arc_x + 0.002, s_end),
+    xytext=(arc_x + 0.022, s_end + 0.038),
+    arrowprops=dict(arrowstyle="-|>", color="#F59E0B",
+                    lw=1.5, mutation_scale=13), zorder=4)
+
+mid_y = (s_start + s_end) / 2
+ax.text(arc_x + 0.090, mid_y + 0.022, "Per query\npoint",
+    ha="left", va="center", fontsize=9, fontweight="bold",
+    color="#F59E0B", fontfamily="sans-serif", zorder=5)
+ax.text(arc_x + 0.090, mid_y - 0.030, "x len(X)\nqueries",
+    ha="left", va="center", fontsize=8.5,
+    color="#64748B", fontfamily="sans-serif", zorder=5)
+
+# ── Status bar ────────────────────────────────────────────────────
+status = "Call  model.fit(X, y)  to load the training data"
+color  = "#F59E0B"
+edge   = "#B45309"
+bg     = "#1c1008"
+
+ax.add_patch(mpatches.FancyBboxPatch(
+    (0.08, 0.022), 0.84, 0.052,
+    boxstyle="round,pad=0.010", facecolor=bg,
+    edgecolor=edge, linewidth=1.2, zorder=2))
+ax.text(0.5, 0.048, status,
+    ha="center", va="center", fontsize=10,
+    color=color, fontfamily="monospace", zorder=3)
+
+plt.tight_layout()
+plt.show()
+   
+    
+
+
+
+
+
+
+
+def learn_about_LogisticRegression():
+
+    # ── Learn About Logistic Regression ──────────────────────────────
+    print("Logistic Regression is a supervised learning algorithm used for binary classification. Despite its name, it does not perform regression — it predicts the probability that an input belongs to class 1, then thresholds that probability into a class label (0 or 1).")
     print("\nKey Concepts:")
-    print("1. Distance Metric: KNN measures closeness using Euclidean, Manhattan, or Minkowski distance. The choice of metric affects which neighbors are selected.")
-    print("2. K Value: K controls how many neighbors vote. Small K = flexible but noisy. Large K = smooth but less sensitive to local patterns.")
-    print("3. No Training Phase: KNN just memorizes the data — fit() only stores X and y. Prediction is where all the computation happens.")
-    print("4. Majority Vote: The most common label among the K neighbors wins. For ties, the first-found label is returned.")
+    print("1. Sigmoid Function: Instead of a raw linear output, logistic regression passes X·w+b through sigmoid: σ(z) = 1/(1+e⁻ᶻ). This squashes any value into (0, 1), giving us a probability.")
+    print("2. Loss Function: Logistic regression uses Cross-Entropy loss (not MSE). It penalizes confident wrong predictions very heavily: J = -(1/m) Σ [ y·log(ŷ) + (1-y)·log(1-ŷ) ]")
+    print("3. Gradient Descent: Weights are updated the same way as linear regression — the cross-entropy gradient simplifies cleanly to dw = (1/m)·Xᵀ(ŷ−y).")
+    print("4. Decision Boundary: predict() applies a threshold at 0.5 — if sigmoid output > 0.5 → class 1, else class 0.")
     print("\nApplications:")
-    print("- Classifying tumors as malignant or benign based on cell features.")
-    print("- Recommending products based on similar users' purchase history.")
-    print("- Detecting anomalies in network traffic by finding outlier points.")
+    print("- Classifying emails as spam or not spam.")
+    print("- Predicting whether a tumor is malignant or benign.")
+    print("- Estimating the probability of customer churn.")
 
     import matplotlib.pyplot as plt
     import matplotlib.patches as mpatches
+    from matplotlib.patches import FancyBboxPatch
     from matplotlib.path import Path
 
     # ── Figure Setup ──────────────────────────────────────────────────
@@ -491,23 +704,24 @@ def learn_about_KNN():
         boxstyle="round,pad=0.01", facecolor="#1E293B",
         edgecolor="#38BDF8", linewidth=1.5, zorder=2)
     ax.add_patch(header)
-    ax.text(0.5, 0.938, "LEARNML  |  How KNN works",
+    ax.text(0.5, 0.938, "LEARNML  |  How Logistic Regression works",
         ha="center", va="center", fontsize=13, fontweight="bold",
         color="#F8FAFC", fontfamily="monospace", zorder=3)
 
     # ── Hyperparameter badges ─────────────────────────────────────────
-    k             = 3
-    distance      = "euclidean"
-    fitted        = False        # mirror self.X_train is not None in real usage
+    weights       = None
+    n_iters       = 100000
+    learning_rate = 0.01
 
-    k_text   = f"k = {k}"
-    d_text   = f"dist = {distance}"
+    fitted   = weights is not None
+    lr_text  = f"lr = {learning_rate}"
+    itr_text = f"iters = {n_iters}"
     st_text  = "fitted \u2713" if fitted else "not fitted"
     st_color = "#10B981" if fitted else "#F59E0B"
 
     for i, (label, color) in enumerate([
-        (k_text,   "#38BDF8"),
-        (d_text,   "#A855F7"),
+        (lr_text,  "#38BDF8"),
+        (itr_text, "#A855F7"),
         (st_text,  st_color),
     ]):
         bx = 0.10 + i * 0.295
@@ -523,42 +737,51 @@ def learn_about_KNN():
     steps = [
         {
             "y": 0.770,
-            "icon": "fit",
-            "title": "Memorize",
-            "idea": "No learning happens. KNN just stores the entire training set. fit() is just two lines of assignment.",
-            "math": "self.X_train = X          self.y_train = y",
+            "icon": "w,b",
+            "title": "Initialize",
+            "idea": "Set all weights to zero and bias to zero. The model predicts 0.5 probability for everything yet.",
+            "math": "self.weights = np.zeros(n_features)          self.bias = 0",
             "color": "#38BDF8", "edge": "#0284C7",
         },
         {
             "y": 0.618,
-            "icon": "d()",
-            "title": "Compute Distances",
-            "idea": "For each new point x, compute its distance to every single training point using the chosen metric.",
-            "math": "distances = [dist(x, x_train)  for x_train in self.X_train]",
+            "icon": "σ(z)",
+            "title": "Sigmoid — Predict Probability",
+            # y_predicted = sigmoid(np.dot(X, self.weights) + self.bias)
+            # sigmoid squashes the linear output to a value between 0 and 1
+            "idea": "Compute the linear score X·w+b then squash it through sigmoid. Output is now a probability.",
+            "math": "y_pred = sigmoid( X · w + b )          σ(z) = 1 / (1 + e⁻ᶻ)",
             "color": "#A855F7", "edge": "#7E22CE",
         },
         {
             "y": 0.466,
-            "icon": "↑k",
-            "title": "Get K Nearest",
-            "idea": "Sort all distances ascending and slice the first k indices — those are the k closest neighbors.",
-            "math": "k_indices = np.argsort(distances)[:self.k]",
+            "icon": "J",
+            "title": "Cross-Entropy Loss",
+            # NOT MSE — cross-entropy penalizes confident wrong predictions heavily
+            # J = -(1/n) * sum( y*log(y_pred) + (1-y)*log(1-y_pred) )
+            "idea": "Cross-entropy loss — not MSE. It punishes confident wrong predictions exponentially harder.",
+            "math": "J = -(1/m) Σ [ y·log(ŷ) + (1−y)·log(1−ŷ) ]",
             "color": "#EC4899", "edge": "#BE185D",
         },
         {
             "y": 0.314,
-            "icon": "y[]",
-            "title": "Collect Labels",
-            "idea": "Look up the true label of each of the k nearest neighbors from the stored training labels.",
-            "math": "k_labels = [self.y_train[i]  for i in k_indices]",
+            "icon": "dJ",
+            "title": "Compute Gradients",
+            # dw = (1/n_samples) * np.dot(X.T, (y_predicted - y))
+            # db = (1/n_samples) * np.sum(y_predicted - y)
+            # cross-entropy gradient simplifies to the same form as linear regression
+            "idea": "Cross-entropy gradient simplifies cleanly. Same form as linear regression — just with sigmoid output.",
+            "math": "dw = (1/m)·Xᵀ(ŷ−y)          db = (1/m)·Σ(ŷ−y)",
             "color": "#F59E0B", "edge": "#B45309",
         },
         {
             "y": 0.162,
-            "icon": "vote",
-            "title": "Majority Vote",
-            "idea": "The most common label among k neighbors wins. bincount for integers, Counter as fallback for strings.",
-            "math": "np.bincount(k_labels).argmax()   |   Counter(k_labels).most_common(1)",
+            "icon": "0|1",
+            "title": "Threshold → Class Label",
+            # class_predicted = np.where(y_predicted > 0.5, 1, 0)
+            # sigmoid returns probabilities — we threshold at 0.5 to get class labels
+            "idea": "Sigmoid returns probabilities. Threshold at 0.5: above → class 1, below → class 0.",
+            "math": "class = np.where(y_pred > 0.5,  1,  0)",
             "color": "#FB923C", "edge": "#C2410C",
         },
     ]
@@ -623,10 +846,9 @@ def learn_about_KNN():
             arrowprops=dict(arrowstyle="-|>", color="#475569",
                             lw=1.8, mutation_scale=16), zorder=3)
 
-    # ── Per-query-point loop arc (Step 5 → Step 2) ───────────────────
-    # predict() calls predict_one(x) for every x in X
-    # steps 2 → 3 → 4 → 5 repeat for each new query point
-    s_start = steps[4]["y"]
+    # ── Gradient descent loop arc (Step 4 → Step 2) ──────────────────
+    # for _ in range(self.n_iters): sigmoid → loss → gradients → update weights
+    s_start = steps[3]["y"]
     s_mid   = steps[2]["y"]
     s_end   = steps[1]["y"]
     arc_x   = 0.87
@@ -644,18 +866,18 @@ def learn_about_KNN():
                         lw=1.5, mutation_scale=13), zorder=4)
 
     mid_y = (s_start + s_end) / 2
-    ax.text(arc_x + 0.090, mid_y + 0.022, "Per query\npoint",
+    ax.text(arc_x + 0.090, mid_y + 0.022, "Repeat each\nepoch",
         ha="left", va="center", fontsize=9, fontweight="bold",
         color="#F59E0B", fontfamily="sans-serif", zorder=5)
-    ax.text(arc_x + 0.090, mid_y - 0.030, "x len(X)\nqueries",
+    ax.text(arc_x + 0.090, mid_y - 0.030, f"x {n_iters}\niterations",
         ha="left", va="center", fontsize=8.5,
         color="#64748B", fontfamily="sans-serif", zorder=5)
 
     # ── Status bar ────────────────────────────────────────────────────
     status = (
-        f"Fitted  —  training samples: {len(self.X_train)}    k = {self.k}    dist = {self.distance}"
+        f"Fitted  —  weights shape: {list(weights.shape)}    bias: {0:.4f}"
         if fitted else
-        "Call  model.fit(X, y)  to load the training data"
+        "Call  model.fit(X, y)  to train the model"
     )
     color = "#10B981" if fitted else "#F59E0B"
     edge  = "#059669" if fitted else "#B45309"
@@ -671,6 +893,3 @@ def learn_about_KNN():
 
     plt.tight_layout()
     plt.show()
-
-   
-    
