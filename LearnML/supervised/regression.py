@@ -174,17 +174,17 @@ class LinearRegression:
 class PolynomialRegression:
     def __init__(self, degree=2, learning_rate=0.001, n_iters=1000):
         self.degree = degree
-        self.linear_regression = LinearRegression(
-            learning_rate=learning_rate,
-            n_iters=n_iters
-        )
-
-    def _polynomial_features(self, X):
+        self.learning_rate = learning_rate
+        self.n_iters = n_iters
+        self.weights = None
+        self.bias = None
+    def _polynomial_features(self, X ):
         n_samples = X.shape[0] #to count how many samples(rows) are in the input data
         X_poly = np.ones((n_samples, self.degree))  # polynomial expansion , to create a new feature matrix with polynomial features up to the specified degree
         for d in range(1, self.degree + 1): # inside the loop, we compute the polynomial features for each degree from 1 to the specified degree. For each degree d, we raise the input feature X to the power of d and store it in the corresponding column of the X_poly matrix. This way, we create a new feature matrix that includes polynomial features up to the specified degree.
             X_poly[:, d-1] = X.flatten() ** d
         return X_poly
+    
     def linear_model(self,X,y):
         #Model training
             n_samples, n_features = X.shape #features are the number of columns in the input data, and samples are the number of rows in the input data
