@@ -3,7 +3,8 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from matplotlib.patches import FancyBboxPatch, FancyArrowPatch
 import matplotlib.patheffects as pe
-import matplotlib.path as Path
+from matplotlib.path import Path
+from matplotlib.patches import Arc
 
 
 class LinearRegression:
@@ -117,14 +118,11 @@ class LinearRegression:
             zorder=3)
     
     # ── Epoch loop arc (Step 4 → Step 2) ────────────────────────────────
-    from matplotlib.patches import Arc
+   
     
     # Dashed curved path via bezier control points
     loop_x = [0.81, 0.96, 0.81]
     loop_y = [steps[3]["y"], 0.455, steps[1]["y"]]
-    
-    from matplotlib.path import Path
-    import matplotlib.patches as mpatches
     
     verts = [
         (loop_x[0], loop_y[0]),
@@ -156,17 +154,13 @@ class LinearRegression:
                 facecolor="#0F172A")
     plt.show()
 
-
-
-
-def predict(self, X ):
+  def predict(self, X ):
     y_predicted = np.dot(X, self.weights) + self.bias
     return y_predicted
 
 
 
 
-#
 
 
 
@@ -191,11 +185,25 @@ class PolynomialRegression:
         for d in range(1, self.degree + 1): # inside the loop, we compute the polynomial features for each degree from 1 to the specified degree. For each degree d, we raise the input feature X to the power of d and store it in the corresponding column of the X_poly matrix. This way, we create a new feature matrix that includes polynomial features up to the specified degree.
             X_poly[:, d-1] = X.flatten() ** d
         return X_poly
+    def linear_model(self,X,y):
+        #Model training
+            n_samples, n_features = X.shape #features are the number of columns in the input data, and samples are the number of rows in the input data
+            self.weights = np.zeros(n_features)
+            self.bias = 0
+            for _ in range(self.n_iters):
+              y_predicted = np.dot(X, self.weights) + self.bias
+              #minimize the loss function using gradient descent
+              #The error for each parameter (weight or bias) in the model by taking the derivative of the loss function with respect to that parameter. The gradients indicate the direction and magnitude of change needed to minimize the loss.   
+              dw = (1/n_samples) * np.dot(X.T, (y_predicted - y))
+              db = (1/n_samples) * np.sum(y_predicted - y)
+              #update parameters
+              self.weights = self.weights - self.learning_rate * dw
+              self.bias = self.bias - self.learning_rate * db
     
 
     def fit(self, X, y):
         X_poly = self._polynomial_features(X)
-        self.linear_regression.fit(X_poly, y) #same as linear regression, but we use the polynomial features instead of the original features. This allows us to fit a polynomial regression model to the data.
+        self.linear_model(X_poly, y) #same as linear regression, but we use the polynomial features instead of the original features. This allows us to fit a polynomial regression model to the data.
         #now, the model is trained using the polynomial features, and we can use it to make predictions on new data.
         #the rest of the code is for visualization purposes, and it is not part of the core algorithm.
 
