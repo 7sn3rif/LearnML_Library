@@ -375,6 +375,7 @@ class PolynomialRegression:
         
         
     def predict(self, X):
+             #same as linear regression, but we use the polynomial features instead of the original features. This allows us to make predictions using the trained polynomial regression model.
              X_poly = self._polynomial_features(X)
-             return self.linear_regression.predict(X_poly)
-     
+             y_predicted = np.dot(X_poly, self.weights) + self.bias
+             return y_predicted
