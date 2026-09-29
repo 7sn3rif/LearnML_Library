@@ -29,8 +29,8 @@ class LinearRegression:
       #update parameters
       self.weights = self.weights - self.learning_rate * dw
       self.bias = self.bias - self.learning_rate * db
-#until here , the algorithm is a standard implementation of linear regression using gradient descent. and the rest of the code is for visualization purposes, and it is not part of the core algorithm.
-#the following code generates a graphical representation of the linear regression training pipeline, illustrating the steps involved in the process.
+      #until here , the algorithm is a standard implementation of linear regression using gradient descent. and the rest of the code is for visualization purposes, and it is not part of the core algorithm.
+      #the following code generates a graphical representation of the linear regression training pipeline, illustrating the steps involved in the process.
 
     
     #graphical representation of the model training      
