@@ -911,6 +911,18 @@ def learn_about_LogisticRegression():
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 def learn_about_NaiveBayes():
 
     # ── Learn About Gaussian Naive Bayes ────────────────────────────
@@ -1405,3 +1417,404 @@ def learn_about_NaiveBayes():
     plt.tight_layout()
 
     plt.show()
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def learn_about_DecisionTree():
+
+    # ── Learn About Decision Trees ────────────────────────────────────
+    print(
+        "Decision Trees are a non-parametric supervised learning method used for both classification and regression tasks. "
+        "The goal is to create a model that predicts the value of a target variable by learning simple decision rules "
+        "inferred from the data features. A tree can be seen as a piecewise constant approximation."
+    )
+    print("\nKey Concepts:")
+    print(
+        "1. Model Representation: A tree consists of internal decision nodes (feature thresholds) and leaf nodes (final predictions). "
+        "Samples traverse left if they satisfy the condition (e.g., feature <= threshold) and right otherwise."
+    )
+    print(
+        "2. Impurity Criteria: The tree evaluates split quality using measures like Gini Impurity or Entropy for classification, "
+        "or Variance Reduction for regression."
+    )
+    print(
+        "3. Best Split Search: At each node, the algorithm greedily searches through all features and candidate thresholds "
+        "to maximize Information Gain (impurity reduction)."
+    )
+    print(
+        "4. Recursive Partitioning: The dataset is split into smaller subsets, and the process repeats recursively on each subset "
+        "until stopping criteria (max depth, min samples) are triggered."
+    )
+    print("\nApplications:")
+    print("- Medical diagnosis based on symptoms and patient metrics.")
+    print("- Credit scoring and loan approval decisions.")
+    print("- Customer churn prediction and feature importance analysis.")
+
+    # ── Figure Setup (2 Columns) ───────────────────────────────────────
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 13), gridspec_kw={'width_ratios': [1.15, 0.85]})
+    fig.patch.set_facecolor("#0F172A")
+    
+    for ax in (ax1, ax2):
+        ax.set_facecolor("#0F172A")
+        ax.set_xlim(0, 1)
+        ax.set_ylim(0, 1)
+        ax.axis("off")
+
+    # ==================================================================
+    # LEFT PANEL: ALGORITHM PIPELINE FLOWCHART
+    # ==================================================================
+
+    # ── Header ────────────────────────────────────────────────────────
+    header1 = mpatches.FancyBboxPatch(
+        (0.08, 0.905), 0.84, 0.065,
+        boxstyle="round,pad=0.01", facecolor="#1E293B",
+        edgecolor="#38BDF8", linewidth=1.5, zorder=2
+    )
+    ax1.add_patch(header1)
+
+    ax1.text(
+        0.5, 0.938, "LEARNML  |  How Decision Trees Work",
+        ha="center", va="center", fontsize=12, fontweight="bold",
+        color="#F8FAFC", fontfamily="monospace", zorder=3
+    )
+
+    # ── Hyperparameter badges ─────────────────────────────────────────
+    root = None
+    max_depth = 100
+    criterion = "gini"
+
+    fitted = root is not None
+    crit_text = f"criterion = '{criterion}'"
+    depth_text = f"max_depth = {max_depth}"
+    st_text = "fitted \u2713" if fitted else "not fitted"
+    st_color = "#10B981" if fitted else "#F59E0B"
+
+    for i, (label, color) in enumerate([
+        (crit_text, "#38BDF8"),
+        (depth_text, "#A855F7"),
+        (st_text, st_color),
+    ]):
+        bx = 0.06 + i * 0.31
+        ax1.add_patch(
+            mpatches.FancyBboxPatch(
+                (bx, 0.856), 0.28, 0.038,
+                boxstyle="round,pad=0.010", facecolor="#1E293B",
+                edgecolor=color, linewidth=1.2, zorder=2
+            )
+        )
+        ax1.text(
+            bx + 0.14, 0.875, label,
+            ha="center", va="center", fontsize=9,
+            color=color, fontfamily="monospace", zorder=3
+        )
+
+    # ── Steps ─────────────────────────────────────────────────────────
+    steps = [
+        {
+            "y": 0.770, "icon": "Stop?", "title": "Check Stopping Criteria",
+            "idea": "If maximum depth is reached, sample size is too small, or node is pure, create a leaf.",
+            "math": "n_labels == 1  |  depth >= max_depth  |  n < min_split",
+            "color": "#38BDF8", "edge": "#0284C7",
+        },
+        {
+            "y": 0.618, "icon": "f,t", "title": "Evaluate Split Candidates",
+            "idea": "Extract unique values for every feature column to form candidate binary thresholds.",
+            "math": "for f in features: thresholds = unique(X[:, f])",
+            "color": "#A855F7", "edge": "#7E22CE",
+        },
+        {
+            "y": 0.466, "icon": "Gain", "title": "Compute Information Gain",
+            "idea": "Measure parent impurity minus weighted child impurities. Pick feature & threshold with max gain.",
+            "math": "Gain = Impurity(y) - (N_l/N)*Imp(y_l) - (N_r/N)*Imp(y_r)",
+            "color": "#EC4899", "edge": "#BE185D",
+        },
+        {
+            "y": 0.314, "icon": "Split", "title": "Partition Dataset",
+            "idea": "Divide current rows into left subset (X <= threshold) and right subset (X > threshold).",
+            "math": "left_idxs = argwhere(X_col <= t)   right_idxs = argwhere(X_col > t)",
+            "color": "#F59E0B", "edge": "#B45309",
+        },
+        {
+            "y": 0.162, "icon": "Recur", "title": "Recurse Child Subtrees",
+            "idea": "Call _grow_tree on left and right subsets with depth + 1, connecting child nodes to parent.",
+            "math": "left = _grow_tree(X[left], depth+1)   right = ...",
+            "color": "#FB923C", "edge": "#C2410C",
+        },
+    ]
+
+    card_w, card_h = 0.68, 0.112
+    gap, icon_r = 0.010, 0.038
+
+    for step in steps:
+        cy = step["y"]
+        x0 = 0.44 - card_w / 2
+        y0 = cy - card_h / 2
+
+        # Shadow
+        ax1.add_patch(
+            mpatches.FancyBboxPatch(
+                (x0 + 0.007, y0 - 0.007), card_w, card_h,
+                boxstyle="round,pad=0.014", facecolor="#000000",
+                edgecolor="none", alpha=0.35, zorder=2
+            )
+        )
+
+        # Card
+        ax1.add_patch(
+            mpatches.FancyBboxPatch(
+                (x0, y0), card_w, card_h,
+                boxstyle="round,pad=0.014", facecolor="#1E293B",
+                edgecolor=step["edge"], linewidth=1.8, zorder=3
+            )
+        )
+
+        # Icon circle
+        icon_x = x0 + 0.056
+        ax1.add_patch(
+            plt.Circle((icon_x, cy), icon_r, facecolor=step["edge"], zorder=4)
+        )
+        ax1.text(
+            icon_x, cy, step["icon"],
+            ha="center", va="center", fontsize=8.5, fontweight="bold",
+            color="#F8FAFC", fontfamily="monospace", zorder=5
+        )
+
+        # Title
+        ax1.text(
+            x0 + 0.115, cy + 0.034, step["title"],
+            ha="left", va="center", fontsize=11.5, fontweight="bold",
+            color=step["color"], fontfamily="sans-serif", zorder=5
+        )
+
+        # Plain English
+        ax1.text(
+            x0 + 0.115, cy + 0.006, step["idea"],
+            ha="left", va="center", fontsize=8.5, color="#CBD5E1",
+            fontfamily="sans-serif", zorder=5
+        )
+
+        # Divider
+        ax1.plot(
+            [x0 + 0.115, x0 + card_w - 0.018], [cy - 0.018, cy - 0.018],
+            color="#2D3748", lw=0.8, zorder=4
+        )
+
+        # Math
+        ax1.text(
+            x0 + 0.115, cy - 0.036, step["math"],
+            ha="left", va="center", fontsize=9,
+            color="#64748B", fontfamily="monospace", zorder=5
+        )
+
+    # ── Vertical arrows ───────────────────────────────────────────────
+    for i in range(len(steps) - 1):
+        y_start = steps[i]["y"] - card_h / 2 - gap
+        y_end = steps[i + 1]["y"] + card_h / 2 + gap
+        ax1.annotate(
+            "", xy=(0.44, y_end), xytext=(0.44, y_start),
+            arrowprops=dict(
+                arrowstyle="-|>", color="#475569", lw=1.8, mutation_scale=16
+            ),
+            zorder=3
+        )
+
+    # ── Recursive loop arc (Step 5 → Step 1) ──────────────────────────
+    s_start, s_mid, s_end = steps[4]["y"], steps[2]["y"], steps[0]["y"]
+    arc_x = 0.82
+
+    verts = [(arc_x, s_start), (arc_x + 0.08, s_mid), (arc_x, s_end)]
+    codes = [Path.MOVETO, Path.CURVE3, Path.CURVE3]
+    ax1.add_patch(
+        mpatches.PathPatch(
+            Path(verts, codes), facecolor="none", edgecolor="#F59E0B",
+            linewidth=2, linestyle=(0, (5, 4)), zorder=3
+        )
+    )
+
+    ax1.annotate(
+        "", xy=(arc_x + 0.002, s_end), xytext=(arc_x + 0.022, s_end - 0.038),
+        arrowprops=dict(
+            arrowstyle="-|>", color="#F59E0B", lw=1.5, mutation_scale=13
+        ),
+        zorder=4
+    )
+
+    mid_y = (s_start + s_end) / 2
+    ax1.text(
+        arc_x + 0.085, mid_y + 0.022, "Recurse for\neach child",
+        ha="left", va="center", fontsize=8.5, fontweight="bold",
+        color="#F59E0B", fontfamily="sans-serif", zorder=5
+    )
+    ax1.text(
+        arc_x + 0.085, mid_y - 0.030, "until leaf\nnode hit",
+        ha="left", va="center", fontsize=8,
+        color="#64748B", fontfamily="sans-serif", zorder=5
+    )
+
+    # ── Convergence note ──────────────────────────────────────────────
+    status = (
+        f"Fitted  —  tree root created"
+        if fitted
+        else "Call  model.fit(X, y)  to train the decision tree"
+    )
+    color = "#10B981" if fitted else "#F59E0B"
+    edge = "#059669" if fitted else "#B45309"
+    bg = "#052e16" if fitted else "#1c1008"
+
+    ax1.add_patch(
+        mpatches.FancyBboxPatch(
+            (0.06, 0.022), 0.88, 0.052,
+            boxstyle="round,pad=0.010", facecolor=bg,
+            edgecolor=edge, linewidth=1.2, zorder=2
+        )
+    )
+    ax1.text(
+        0.5, 0.048, status,
+        ha="center", va="center", fontsize=10,
+        color=color, fontfamily="monospace", zorder=3
+    )
+
+    # ==================================================================
+    # RIGHT PANEL: VISUAL DECISION TREE GRAPH (YES / NO)
+    # ==================================================================
+
+    header2 = mpatches.FancyBboxPatch(
+        (0.08, 0.905), 0.84, 0.065,
+        boxstyle="round,pad=0.01", facecolor="#1E293B",
+        edgecolor="#A855F7", linewidth=1.5, zorder=2
+    )
+    ax2.add_patch(header2)
+
+    ax2.text(
+        0.5, 0.938, "VISUAL STRUCTURE  |  Tree Predictions",
+        ha="center", va="center", fontsize=12, fontweight="bold",
+        color="#F8FAFC", fontfamily="monospace", zorder=3
+    )
+
+    # Node rendering function
+    def draw_node(x, y, text, is_leaf=False, is_green=False, w=0.30, h=0.065):
+        box_color = "#059669" if (is_leaf and is_green) else ("#DC2626" if is_leaf else "#334155")
+        border_color = "#10B981" if (is_leaf and is_green) else ("#EF4444" if is_leaf else "#38BDF8")
+        text_color = "#F8FAFC"
+        
+        # Shadow
+        ax2.add_patch(
+            mpatches.FancyBboxPatch(
+                (x - w / 2 + 0.005, y - h / 2 - 0.005), w, h,
+                boxstyle="round,pad=0.010", facecolor="#000000",
+                edgecolor="none", alpha=0.35, zorder=2
+            )
+        )
+        # Box
+        ax2.add_patch(
+            mpatches.FancyBboxPatch(
+                (x - w / 2, y - h / 2), w, h,
+                boxstyle="round,pad=0.010", facecolor=box_color,
+                edgecolor=border_color, linewidth=1.8, zorder=3
+            )
+        )
+        # Text
+        ax2.text(
+            x, y, text,
+            ha="center", va="center", fontsize=9.5, fontweight="bold",
+            color=text_color, fontfamily="sans-serif", zorder=4
+        )
+
+    # Branch connection function with Yes / No label
+    def draw_edge(p1, p2, label, label_color="#10B981"):
+        ax2.annotate(
+            "", xy=p2, xytext=p1,
+            arrowprops=dict(
+                arrowstyle="-|>", color="#94A3B8", lw=1.8, mutation_scale=14
+            ),
+            zorder=2
+        )
+        mx = (p1[0] + p2[0]) / 2
+        my = (p1[1] + p2[1]) / 2
+        # Text badge for Yes/No
+        ax2.text(
+            mx, my, f" {label} ",
+            ha="center", va="center", fontsize=8.5, fontweight="bold",
+            color=label_color, fontfamily="monospace", zorder=5,
+            bbox=dict(boxstyle="round,pad=0.2", facecolor="#0F172A", edgecolor="none")
+        )
+
+    # Node positions
+    node_root   = (0.50, 0.81)
+    node_l1     = (0.26, 0.58)
+    node_r1     = (0.74, 0.58)
+    node_l2_l   = (0.13, 0.35)
+    node_l2_r   = (0.39, 0.35)
+    node_r2_l   = (0.61, 0.35)
+    node_r2_r   = (0.87, 0.35)
+
+    # Draw Nodes
+    draw_node(node_root[0], node_root[1], "Age <= 30 ?", w=0.32)
+    
+    draw_node(node_l1[0], node_l1[1], "Income <= 50k ?", w=0.32)
+    draw_node(node_r1[0], node_r1[1], "Student == Yes ?", w=0.32)
+
+    draw_node(node_l2_l[0], node_l2_l[1], "Class: No ✗", is_leaf=True, is_green=False, w=0.22)
+    draw_node(node_l2_r[0], node_l2_r[1], "Class: Yes ✓", is_leaf=True, is_green=True, w=0.22)
+    draw_node(node_r2_l[0], node_r2_l[1], "Class: No ✗", is_leaf=True, is_green=False, w=0.22)
+    draw_node(node_r2_r[0], node_r2_r[1], "Class: Yes ✓", is_leaf=True, is_green=True, w=0.22)
+
+    # Draw Edges (Yes = Left, No = Right)
+    h_offset = 0.033
+    draw_edge((node_root[0] - 0.04, node_root[1] - h_offset), (node_l1[0] + 0.02, node_l1[1] + h_offset), "Yes", "#34D399")
+    draw_edge((node_root[0] + 0.04, node_root[1] - h_offset), (node_r1[0] - 0.02, node_r1[1] + h_offset), "No", "#F87171")
+
+    draw_edge((node_l1[0] - 0.03, node_l1[1] - h_offset), (node_l2_l[0] + 0.01, node_l2_l[1] + h_offset), "Yes", "#34D399")
+    draw_edge((node_l1[0] + 0.03, node_l1[1] - h_offset), (node_l2_r[0] - 0.01, node_l2_r[1] + h_offset), "No", "#F87171")
+
+    draw_edge((node_r1[0] - 0.03, node_r1[1] - h_offset), (node_r2_l[0] + 0.01, node_r2_l[1] + h_offset), "Yes", "#34D399")
+    draw_edge((node_r1[0] + 0.03, node_r1[1] - h_offset), (node_r2_r[0] - 0.01, node_r2_r[1] + h_offset), "No", "#F87171")
+
+    # Legend at bottom right
+    ax2.add_patch(
+        mpatches.FancyBboxPatch(
+            (0.12, 0.12), 0.76, 0.12,
+            boxstyle="round,pad=0.010", facecolor="#1E293B",
+            edgecolor="#475569", linewidth=1.2, zorder=2
+        )
+    )
+    ax2.text(
+        0.5, 0.205, "TREE LEGEND",
+        ha="center", va="center", fontsize=9.5, fontweight="bold",
+        color="#CBD5E1", fontfamily="sans-serif", zorder=3
+    )
+    ax2.text(
+        0.5, 0.155, "Decision Node: Evaluate feature condition\nGreen Branch (Yes): Condition is True\nRed Branch (No): Condition is False",
+        ha="center", va="center", fontsize=8.5,
+        color="#94A3B8", fontfamily="monospace", zorder=3
+    )
+
+    plt.tight_layout()
+    plt.show()
+
