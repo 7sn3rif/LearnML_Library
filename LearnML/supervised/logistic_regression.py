@@ -16,7 +16,7 @@ def sigmoid(x):
 
 
 
-class LogisticRegression():
+class LogisticRegression:
   def __init__(self, learning_rate=0.01, n_iters=100000):
     self.learning_rate=learning_rate
     self.n_iters = n_iters

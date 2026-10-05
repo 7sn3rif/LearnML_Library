@@ -893,3 +893,515 @@ def learn_about_LogisticRegression():
 
     plt.tight_layout()
     plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def learn_about_NaiveBayes():
+
+    # ── Learn About Gaussian Naive Bayes ────────────────────────────
+    print(
+        "Gaussian Naive Bayes is a supervised classification algorithm "
+        "based on Bayes' theorem. It assumes that the features are "
+        "conditionally independent given the class and models each "
+        "feature using a Gaussian (normal) distribution."
+    )
+
+    print("\nKey Concepts:")
+    print(
+        "1. Classes: The model first finds all unique classes in the target y."
+    )
+    print(
+        "2. Class Separation: For each class, the training samples belonging "
+        "to that class are selected."
+    )
+    print(
+        "3. Mean: For every feature, the model calculates the mean value "
+        "for the current class."
+    )
+    print(
+        "4. Variance: For every feature, the model calculates the variance "
+        "for the current class."
+    )
+    print(
+        "5. Prior: The model calculates how common each class is in the "
+        "training data."
+    )
+    print(
+        "6. Gaussian PDF: During prediction, the mean and variance are used "
+        "to calculate the likelihood of each feature."
+    )
+    print(
+        "7. Classification: The class with the highest posterior score "
+        "is selected as the prediction."
+    )
+
+    print("\nApplications:")
+    print("- Spam email classification")
+    print("- Medical diagnosis classification")
+    print("- Customer churn classification")
+    print("- Document and text classification")
+
+
+    # ── Figure Setup ─────────────────────────────────────────────────
+
+    fig, ax = plt.subplots(figsize=(10, 13))
+
+    fig.patch.set_facecolor("#0F172A")
+    ax.set_facecolor("#0F172A")
+
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+    ax.axis("off")
+
+
+    # ── Header ───────────────────────────────────────────────────────
+
+    header = mpatches.FancyBboxPatch(
+        (0.12, 0.905), 0.76, 0.065,
+        boxstyle="round,pad=0.01",
+        facecolor="#1E293B",
+        edgecolor="#38BDF8",
+        linewidth=1.5,
+        zorder=2
+    )
+
+    ax.add_patch(header)
+
+    ax.text(
+        0.5, 0.938,
+        "LEARNML  |  How Gaussian Naive Bayes works",
+        ha="center",
+        va="center",
+        fontsize=13,
+        fontweight="bold",
+        color="#F8FAFC",
+        fontfamily="monospace",
+        zorder=3
+    )
+
+
+    # ── Model information badges ────────────────────────────────────
+
+    classes = "C = {0, 1, ...}"
+    distribution = "Gaussian"
+    assumption = "Conditional Independence"
+
+    for i, (label, color) in enumerate([
+        (classes, "#38BDF8"),
+        (distribution, "#A855F7"),
+        (assumption, "#10B981"),
+    ]):
+
+        bx = 0.08 + i * 0.305
+
+        ax.add_patch(
+            mpatches.FancyBboxPatch(
+                (bx, 0.856), 0.285, 0.038,
+                boxstyle="round,pad=0.010",
+                facecolor="#1E293B",
+                edgecolor=color,
+                linewidth=1.2,
+                zorder=2
+            )
+        )
+
+        ax.text(
+            bx + 0.1425,
+            0.875,
+            label,
+            ha="center",
+            va="center",
+            fontsize=9,
+            color=color,
+            fontfamily="monospace",
+            zorder=3
+        )
+
+
+    # ── Steps ────────────────────────────────────────────────────────
+    #
+    # These steps correspond directly to your fit() method.
+    #
+    # fit()
+    #   │
+    #   ├── find classes
+    #   │
+    #   └── for each class:
+    #          X_c = X[y == c]
+    #          mean
+    #          variance
+    #          prior
+    #
+    # The loop is repeated for every class.
+
+    steps = [
+
+        {
+            "y": 0.770,
+            "icon": "C",
+            "title": "Find Classes",
+            "idea": (
+                "Find every unique class label in y. "
+                "These are the possible classes the model can predict."
+            ),
+            "math": "_classes = np.unique(y)",
+            "color": "#38BDF8",
+            "edge": "#0284C7",
+        },
+
+        {
+            "y": 0.618,
+            "icon": "Xc",
+            "title": "Separate by Class",
+            "idea": (
+                "Select only the training samples that belong to "
+                "the current class."
+            ),
+            "math": "X_c = X[y == c]",
+            "color": "#A855F7",
+            "edge": "#7E22CE",
+        },
+
+        {
+            "y": 0.466,
+            "icon": "μ",
+            "title": "Calculate Mean",
+            "idea": (
+                "For the current class, calculate the average of "
+                "each feature."
+            ),
+            "math": "mean = X_c.mean(axis=0)",
+            "color": "#EC4899",
+            "edge": "#BE185D",
+        },
+
+        {
+            "y": 0.314,
+            "icon": "σ²",
+            "title": "Calculate Variance",
+            "idea": (
+                "Measure how much each feature varies around "
+                "its class mean."
+            ),
+            "math": "var = X_c.var(axis=0)",
+            "color": "#F59E0B",
+            "edge": "#B45309",
+        },
+
+        {
+            "y": 0.162,
+            "icon": "P",
+            "title": "Calculate Prior",
+            "idea": (
+                "Calculate how frequently the current class appears "
+                "in the training dataset."
+            ),
+            "math": "P(c) = n_c / n_samples",
+            "color": "#FB923C",
+            "edge": "#C2410C",
+        },
+    ]
+
+
+    # ── Card dimensions ─────────────────────────────────────────────
+
+    card_w = 0.68
+    card_h = 0.112
+    gap = 0.010
+    icon_r = 0.038
+
+
+    # ── Draw cards ──────────────────────────────────────────────────
+
+    for step in steps:
+
+        cy = step["y"]
+
+        x0 = 0.5 - card_w / 2
+        y0 = cy - card_h / 2
+
+
+        # Shadow
+        ax.add_patch(
+            mpatches.FancyBboxPatch(
+                (x0 + 0.007, y0 - 0.007),
+                card_w,
+                card_h,
+                boxstyle="round,pad=0.014",
+                facecolor="#000000",
+                edgecolor="none",
+                alpha=0.35,
+                zorder=2
+            )
+        )
+
+
+        # Card
+        ax.add_patch(
+            mpatches.FancyBboxPatch(
+                (x0, y0),
+                card_w,
+                card_h,
+                boxstyle="round,pad=0.014",
+                facecolor="#1E293B",
+                edgecolor=step["edge"],
+                linewidth=1.8,
+                zorder=3
+            )
+        )
+
+
+        # Icon circle
+        icon_x = x0 + 0.056
+
+        ax.add_patch(
+            plt.Circle(
+                (icon_x, cy),
+                icon_r,
+                facecolor=step["edge"],
+                zorder=4
+            )
+        )
+
+        ax.text(
+            icon_x,
+            cy,
+            step["icon"],
+            ha="center",
+            va="center",
+            fontsize=8.5,
+            fontweight="bold",
+            color="#F8FAFC",
+            fontfamily="monospace",
+            zorder=5
+        )
+
+
+        # Title
+        ax.text(
+            x0 + 0.115,
+            cy + 0.034,
+            step["title"],
+            ha="left",
+            va="center",
+            fontsize=12,
+            fontweight="bold",
+            color=step["color"],
+            fontfamily="sans-serif",
+            zorder=5
+        )
+
+
+        # Plain English explanation
+        ax.text(
+            x0 + 0.115,
+            cy + 0.006,
+            step["idea"],
+            ha="left",
+            va="center",
+            fontsize=8.8,
+            color="#CBD5E1",
+            fontfamily="sans-serif",
+            zorder=5
+        )
+
+
+        # Divider
+        ax.plot(
+            [x0 + 0.115, x0 + card_w - 0.018],
+            [cy - 0.018, cy - 0.018],
+            color="#2D3748",
+            lw=0.8,
+            zorder=4
+        )
+
+
+        # Math
+        ax.text(
+            x0 + 0.115,
+            cy - 0.036,
+            step["math"],
+            ha="left",
+            va="center",
+            fontsize=9.5,
+            color="#64748B",
+            fontfamily="monospace",
+            zorder=5
+        )
+
+
+    # ── Vertical arrows ─────────────────────────────────────────────
+
+    for i in range(len(steps) - 1):
+
+        y_start = (
+            steps[i]["y"]
+            - card_h / 2
+            - gap
+        )
+
+        y_end = (
+            steps[i + 1]["y"]
+            + card_h / 2
+            + gap
+        )
+
+        ax.annotate(
+            "",
+            xy=(0.5, y_end),
+            xytext=(0.5, y_start),
+            arrowprops=dict(
+                arrowstyle="-|>",
+                color="#475569",
+                lw=1.8,
+                mutation_scale=16
+            ),
+            zorder=3
+        )
+
+
+    # ── Class processing loop ───────────────────────────────────────
+    #
+    # The statistics are NOT calculated only once.
+    #
+    # They are calculated separately for every class:
+    #
+    # Class 0 → mean, variance, prior
+    # Class 1 → mean, variance, prior
+    # Class 2 → mean, variance, prior
+    # ...
+    #
+    # until all classes have been processed.
+
+    s_start = steps[4]["y"]
+    s_mid = steps[2]["y"]
+    s_end = steps[1]["y"]
+
+    arc_x = 0.87
+
+    verts = [
+        (arc_x, s_start),
+        (arc_x + 0.08, s_mid),
+        (arc_x, s_end)
+    ]
+
+    codes = [
+        Path.MOVETO,
+        Path.CURVE3,
+        Path.CURVE3
+    ]
+
+    ax.add_patch(
+        mpatches.PathPatch(
+            Path(verts, codes),
+            facecolor="none",
+            edgecolor="#F59E0B",
+            linewidth=2,
+            linestyle=(0, (5, 4)),
+            zorder=3
+        )
+    )
+
+
+    # Arrowhead pointing back toward "Separate by Class"
+
+    ax.annotate(
+        "",
+        xy=(arc_x + 0.002, s_end),
+        xytext=(arc_x + 0.022, s_end + 0.038),
+        arrowprops=dict(
+            arrowstyle="-|>",
+            color="#F59E0B",
+            lw=1.5,
+            mutation_scale=13
+        ),
+        zorder=4
+    )
+
+
+    # Loop label
+
+    mid_y = (s_start + s_end) / 2
+
+    ax.text(
+        arc_x + 0.090,
+        mid_y + 0.022,
+        "Repeat for\neach class",
+        ha="left",
+        va="center",
+        fontsize=9,
+        fontweight="bold",
+        color="#F59E0B",
+        fontfamily="sans-serif",
+        zorder=5
+    )
+
+    ax.text(
+        arc_x + 0.090,
+        mid_y - 0.030,
+        "class 0 → class 1\n→ ... → class n",
+        ha="left",
+        va="center",
+        fontsize=8.2,
+        color="#64748B",
+        fontfamily="sans-serif",
+        zorder=5
+    )
+
+
+    # ── Gaussian model information ─────────────────────────────────
+    #
+    # After training, every class has:
+    #
+    # mean
+    # variance
+    # prior
+    #
+    # These values are later used by _pdf() and _predict().
+
+    ax.add_patch(
+        mpatches.FancyBboxPatch(
+            (0.08, 0.022),
+            0.84,
+            0.052,
+            boxstyle="round,pad=0.010",
+            facecolor="#052e16",
+            edgecolor="#059669",
+            linewidth=1.2,
+            zorder=2
+        )
+    )
+
+    ax.text(
+        0.5,
+        0.048,
+        "Model learned  —  mean μ  |  variance σ²  |  prior P(c)",
+        ha="center",
+        va="center",
+        fontsize=10,
+        color="#10B981",
+        fontfamily="monospace",
+        zorder=3
+    )
+
+
+    # ── Finish ──────────────────────────────────────────────────────
+
+    plt.tight_layout()
+
+    plt.show()
