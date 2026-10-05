@@ -185,7 +185,7 @@ class PolynomialRegression:
             X_poly[:, d-1] = X.flatten() ** d
         return X_poly
     
-    def linear_model(self,X,y):
+    def _linear_model(self,X,y):
         #Model training
             n_samples, n_features = X.shape #features are the number of columns in the input data, and samples are the number of rows in the input data
             self.weights = np.zeros(n_features)
@@ -203,7 +203,7 @@ class PolynomialRegression:
 
     def fit(self, X, y):
         X_poly = self._polynomial_features(X)
-        self.linear_model(X_poly, y) #same as linear regression, but we use the polynomial features instead of the original features. This allows us to fit a polynomial regression model to the data.
+        self._linear_model(X_poly, y) #same as linear regression, but we use the polynomial features instead of the original features. This allows us to fit a polynomial regression model to the data.
         #now, the model is trained using the polynomial features, and we can use it to make predictions on new data.
         #the rest of the code is for visualization purposes, and it is not part of the core algorithm.
 
