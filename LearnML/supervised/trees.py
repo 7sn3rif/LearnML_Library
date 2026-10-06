@@ -271,4 +271,422 @@ class DecisionTree:
     return np.array(predictions)
 
   
-  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ #visulaizer of the trained decision tree model, providing a graphical representation of the tree structure, including decision nodes, leaf nodes, and the splits based on features and thresholds.
+  def visualize(self, feature_names=None):
+
+    if self.root is None:
+        print("The tree has not been fitted yet.")
+        return
+
+    # ---------------------------------------------------------
+    # Feature name
+    # ---------------------------------------------------------
+    def get_feature_name(feature_idx):
+        if feature_names is not None:
+            return feature_names[feature_idx]
+        return f"Feature {feature_idx}"
+
+    # ---------------------------------------------------------
+    # Calculate tree depth
+    # ---------------------------------------------------------
+    def get_depth(node):
+        if node is None:
+            return 0
+
+        if node.is_leaf_node():
+            return 1
+
+        return 1 + max(
+            get_depth(node.left),
+            get_depth(node.right)
+        )
+
+    # ---------------------------------------------------------
+    # Count nodes
+    # ---------------------------------------------------------
+    def count_nodes(node):
+        if node is None:
+            return 0
+
+        if node.is_leaf_node():
+            return 1
+
+        return (
+            1
+            + count_nodes(node.left)
+            + count_nodes(node.right)
+        )
+
+    # ---------------------------------------------------------
+    # Draw nodes recursively
+    # ---------------------------------------------------------
+    def draw_node(ax, node, x, y, dx, dy):
+
+        # =====================================================
+        # LEAF
+        # =====================================================
+        if node.is_leaf_node():
+
+            box = FancyBboxPatch(
+                (x - 0.055, y - 0.035),
+                0.11,
+                0.07,
+                boxstyle="round,pad=0.01",
+                facecolor="#064E3B",
+                edgecolor="#10B981",
+                linewidth=2
+            )
+
+            ax.add_patch(box)
+
+            ax.text(
+                x,
+                y,
+                f"Leaf\nClass = {node.value}",
+                ha="center",
+                va="center",
+                fontsize=9,
+                color="#F8FAFC",
+                fontweight="bold",
+                fontfamily="monospace"
+            )
+
+            return
+
+        # =====================================================
+        # DECISION NODE
+        # =====================================================
+
+        feature_name = get_feature_name(node.feature)
+
+        box = FancyBboxPatch(
+            (x - 0.075, y - 0.04),
+            0.15,
+            0.08,
+            boxstyle="round,pad=0.01",
+            facecolor="#1E293B",
+            edgecolor="#38BDF8",
+            linewidth=2
+        )
+
+        ax.add_patch(box)
+
+        ax.text(
+            x,
+            y + 0.014,
+            feature_name,
+            ha="center",
+            va="center",
+            fontsize=9,
+            fontweight="bold",
+            color="#38BDF8"
+        )
+
+        ax.text(
+            x,
+            y - 0.016,
+            f"≤ {node.threshold:.3f}",
+            ha="center",
+            va="center",
+            fontsize=8.5,
+            color="#CBD5E1",
+            fontfamily="monospace"
+        )
+
+        # -----------------------------------------------------
+        # Children
+        # -----------------------------------------------------
+
+        left_x = x - dx
+        right_x = x + dx
+        child_y = y - dy
+
+        # -----------------------------------------------------
+        # Arrows
+        # -----------------------------------------------------
+
+        ax.annotate(
+            "",
+            xy=(left_x, child_y + 0.04),
+            xytext=(x - 0.035, y - 0.04),
+            arrowprops=dict(
+                arrowstyle="-|>",
+                color="#10B981",
+                lw=1.5
+            )
+        )
+
+        ax.annotate(
+            "",
+            xy=(right_x, child_y + 0.04),
+            xytext=(x + 0.035, y - 0.04),
+            arrowprops=dict(
+                arrowstyle="-|>",
+                color="#F59E0B",
+                lw=1.5
+            )
+        )
+
+        # -----------------------------------------------------
+        # Branch labels
+        # -----------------------------------------------------
+
+        ax.text(
+            (x + left_x) / 2,
+            (y + child_y) / 2 + 0.01,
+            "True",
+            ha="center",
+            fontsize=8,
+            color="#10B981",
+            fontfamily="monospace"
+        )
+
+        ax.text(
+            (x + right_x) / 2,
+            (y + child_y) / 2 + 0.01,
+            "False",
+            ha="center",
+            fontsize=8,
+            color="#F59E0B",
+            fontfamily="monospace"
+        )
+
+        # -----------------------------------------------------
+        # Recursive children
+        # -----------------------------------------------------
+
+        draw_node(
+            ax,
+            node.left,
+            left_x,
+            child_y,
+            dx / 2,
+            dy
+        )
+
+        draw_node(
+            ax,
+            node.right,
+            right_x,
+            child_y,
+            dx / 2,
+            dy
+        )
+
+    # =========================================================
+    # TREE INFORMATION
+    # =========================================================
+
+    tree_depth = get_depth(self.root) - 1
+    total_nodes = count_nodes(self.root)
+
+    # =========================================================
+    # FIGURE
+    # =========================================================
+
+    fig_width = max(14, 2 ** min(tree_depth, 5))
+    fig_height = max(9, tree_depth * 2.5)
+
+    fig, ax = plt.subplots(
+        figsize=(fig_width, fig_height)
+    )
+
+    fig.patch.set_facecolor("#0F172A")
+    ax.set_facecolor("#0F172A")
+
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+
+    ax.axis("off")
+
+    # =========================================================
+    # HEADER
+    # =========================================================
+
+    header = FancyBboxPatch(
+        (0.20, 0.94),
+        0.60,
+        0.045,
+        boxstyle="round,pad=0.01",
+        facecolor="#1E293B",
+        edgecolor="#38BDF8",
+        linewidth=1.5
+    )
+
+    ax.add_patch(header)
+
+    ax.text(
+        0.5,
+        0.962,
+        "LEARNML  |  Trained Decision Tree",
+        ha="center",
+        va="center",
+        fontsize=13,
+        fontweight="bold",
+        color="#F8FAFC",
+        fontfamily="monospace"
+    )
+
+    # =========================================================
+    # INFORMATION PANEL
+    # =========================================================
+
+    info = FancyBboxPatch(
+        (0.18, 0.875),
+        0.64,
+        0.045,
+        boxstyle="round,pad=0.008",
+        facecolor="#1E293B",
+        edgecolor="#475569",
+        linewidth=1
+    )
+
+    ax.add_patch(info)
+
+    ax.text(
+        0.5,
+        0.897,
+        f"DEPTH  {tree_depth}     "
+        f"NODES  {total_nodes}     "
+        f"CRITERION  {self.crietaion.upper()}     "
+        f"MAX DEPTH  {self.max_depth}",
+        ha="center",
+        va="center",
+        fontsize=8.5,
+        color="#94A3B8",
+        fontfamily="monospace"
+    )
+
+    # =========================================================
+    # TREE
+    # =========================================================
+
+    draw_node(
+        ax,
+        self.root,
+        x=0.5,
+        y=0.80,
+        dx=0.27,
+        dy=0.16
+    )
+
+    # =========================================================
+    # LEGEND
+    # =========================================================
+
+    ax.text(
+        0.5,
+        0.035,
+        "True = feature ≤ threshold     |     "
+        "False = feature > threshold",
+        ha="center",
+        va="center",
+        fontsize=9,
+        color="#64748B",
+        fontfamily="monospace"
+    )
+
+    plt.tight_layout()
+
+    plt.savefig(
+        "decision_tree_actual.png",
+        dpi=150,
+        bbox_inches="tight",
+        facecolor="#0F172A"
+    )
+
+    plt.show()
