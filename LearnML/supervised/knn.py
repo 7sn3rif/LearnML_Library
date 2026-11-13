@@ -169,11 +169,11 @@ class KNN:
 
 
  def predict(self , X):
-   predictions = np.array([self.predict_one(x) for x in X])
+   predictions = np.array([self._predict_one(x) for x in X])
    return predictions
  
 
- def predict_one(self , x):
+ def _predict_one(self , x):
   #compute the distance
   distances = [self._compute_distance(x , x_train) for x_train in self.X_train]
 

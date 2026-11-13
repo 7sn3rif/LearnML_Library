@@ -7,7 +7,7 @@ from matplotlib.path import Path
 from matplotlib.patches import Arc
 from supervised.trees import DecisionTree 
 
-
+#This class is built on top of the DecisionTree class
 class RandomForestClassifier:
   def __init__(self, n_trees=20, min_samples_split=2, max_depth=10, n_features=None, criterion="gini"):
     self.n_trees = n_trees

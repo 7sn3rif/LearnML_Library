@@ -45,18 +45,18 @@ class Node:
 
 
 class DecisionTree:
-  def __init__(self, min_samples_split=2, max_depth=100, n_features=None,crietaion='gini'):
+  def __init__(self, min_samples_split=2, max_depth=100, n_features=None,criterion='gini'):
     self.min_samples_split=min_samples_split
     self.max_depth=max_depth
     self.n_features=n_features
     self.root=None
-    self.crietaion=crietaion
+    self.criterion=criterion
 
   def _compute_impurity(self,y):
     #to choose which method to claculate the info gain
-    if self.crietaion=='gini':
+    if self.criterion=='gini':
       return gini(y)
-    elif self.crietaion=='entropy':
+    elif self.criterion=='entropy':
       return entropy(y)
 
 #helper method to split the dataset based on a feature and a threshold, returning the indices of the left and right child nodes.
@@ -287,84 +287,7 @@ class DecisionTree:
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
+
  #visulaizer of the trained decision tree model, providing a graphical representation of the tree structure, including decision nodes, leaf nodes, and the splits based on features and thresholds.
   def visualize(self, feature_names=None):
 
@@ -642,7 +565,7 @@ class DecisionTree:
         0.897,
         f"DEPTH  {tree_depth}     "
         f"NODES  {total_nodes}     "
-        f"CRITERION  {self.crietaion.upper()}     "
+        f"CRITERION  {self.criterion.upper()}     "
         f"MAX DEPTH  {self.max_depth}",
         ha="center",
         va="center",
@@ -690,3 +613,29 @@ class DecisionTree:
     )
 
     plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
