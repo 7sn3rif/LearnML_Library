@@ -6,7 +6,7 @@ from matplotlib.path import Path
 
 
 
-f
+
 
 #learn about regression
 def learn_about_LinearRegression():
