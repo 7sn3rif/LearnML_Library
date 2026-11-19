@@ -29,13 +29,8 @@ class KNN:
     else:
         raise ValueError(f"Unknown distance metric: {self.distance}")
 
-
-
- def fit(self , X , y) :
-    self.X_train = X
-    self.y_train = y
-
-    #graphical representation of the model pipeline
+ def show_training_plot(self):   
+ #graphical representation of the model pipeline
     
     # ── Graphical representation of the model training ──────────────
    
@@ -166,6 +161,17 @@ class KNN:
 
     plt.tight_layout()
     plt.show()
+
+
+ def fit(self , X , y , plot=True): 
+    self.X_train = X
+    self.y_train = y
+
+    if plot:
+        self.show_training_plot()
+    else:    
+        print("Training complete. Model is ready to make predictions.")
+   
 
 
  def predict(self , X):
