@@ -5,7 +5,7 @@ from matplotlib.patches import FancyBboxPatch, FancyArrowPatch
 import matplotlib.patheffects as pe
 from matplotlib.path import Path
 from matplotlib.patches import Arc
-from supervised.trees import DecisionTree 
+from LearnML.supervised.trees import DecisionTree 
 
 #This class is built on top of the DecisionTree class
 class RandomForestClassifier:
@@ -25,20 +25,37 @@ class RandomForestClassifier:
     return X[idxs], y[idxs]
   
     
-def   fit(self, X, y):
+  def fit(self, X, y, plot=True):
   #create a forest with n trees
-  for _ in range(self.n_trees):
-    tree = DecisionTree(
-        min_samples_split=self.min_samples_split,
-        max_depth=self.max_depth,
-        n_features=self.n_features,
-        criterion=self.criterion
-    )
-    X_sample, y_sample = self._bootstrap_sampling(X, y)
-    tree.fit(X_sample, y_sample)
-    self.trees.append(tree)
+    for _ in range(self.n_trees):
+      tree = DecisionTree(
+          min_samples_split=self.min_samples_split,
+          max_depth=self.max_depth,
+          n_features=self.n_features,
+          criterion=self.criterion
+      )
+      X_sample, y_sample = self._bootstrap_sampling(X, y)
+      tree.fit(X_sample, y_sample,plot=False)
+      self.trees.append(tree)
 
+    if plot:
+      self.show_training_plot()
     
+
+  def _voting(self,y):
+   most_common=np.bincount(y).argmax()
+   return most_common
+
+
+  def predict(self,X):
+    predictions = np.array([tree.predict(X) for tree in self.trees])
+    predictions = np.transpose(predictions)
+    final_predictions=[]
+    for pred in predictions:
+      final_predictions.append(self._voting(pred))
+    return np.array(final_predictions)
+
+  def show_training_plot(self):
           # ── Graphical representation of the Random Forest training pipeline ──────────
     fig, ax = plt.subplots(figsize=(9, 12))
     fig.patch.set_facecolor("#0F172A")
@@ -375,42 +392,3 @@ def   fit(self, X, y):
     )
     
     plt.show()
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  def _voting(self,y):
-   most_common=np.bincount(y).argmax()
-   return most_common
-
-
-  def predict(self,X):
-    predictions = np.array([tree.predict(X) for tree in self.trees])
-    predictions = np.transpose(predictions)
-    final_predictions=[]
-    for pred in predictions:
-      final_predictions.append(self._voting(pred))
-    return np.array(final_predictions)
-
-
-

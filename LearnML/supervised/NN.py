@@ -211,305 +211,9 @@ class NeuralNetwork:
         for layer in self.layers:
             layer.update(learning_rate, t, optimizer)
 
-    def show_training_plot(self, learning_rate, iterations):
+   
 
-        fig, ax = plt.subplots(figsize=(16, 9))
-        fig.patch.set_facecolor('#0F172A')
-        ax.set_facecolor('#0F172A')
-
-        ax.set_xlim(0, 1)
-        ax.set_ylim(0, 1)
-        ax.axis('off')
-
-        # ── Title ──────────────────────────────────────────────
-        ax.text(
-            0.5, 0.94,
-            "LEARNML | Neural Network Training Pipeline",
-            ha='center', va='center',
-            fontsize=20, fontweight='bold',
-            color='#38BDF8', family='monospace'
-        )
-
-        ax.text(
-            0.5, 0.895,
-            "How a neural network learns through forward and backward propagation",
-            ha='center', va='center',
-            fontsize=10, color='#94A3B8'
-        )
-
-        # ── Training information ───────────────────────────────
-        info = [
-            ("OPTIMIZER", self.optimizer_name.upper()),
-            ("LOSS", self.loss_name.upper()),
-            ("ITERATIONS", str(iterations)),
-            ("LEARNING RATE", str(learning_rate))
-        ]
-
-        info_x = [0.17, 0.39, 0.61, 0.83]
-
-        for x, (label, value) in zip(info_x, info):
-
-            box = FancyBboxPatch(
-                (x - 0.09, 0.79), 0.18, 0.065,
-                boxstyle="round,pad=0.008,rounding_size=0.01",
-                facecolor='#1E293B',
-                edgecolor='#334155',
-                linewidth=1.2
-            )
-
-            ax.add_patch(box)
-
-            ax.text(
-                x, 0.83, label,
-                ha='center', va='center',
-                fontsize=8, color='#94A3B8',
-                family='monospace'
-            )
-
-            ax.text(
-                x, 0.805, value,
-                ha='center', va='center',
-                fontsize=10, color='#38BDF8',
-                fontweight='bold'
-            )
-
-        # ── Pipeline stages ────────────────────────────────────
-        stages = [
-            {
-                "x": 0.04,
-                "color": "#38BDF8",
-                "number": "01",
-                "title": "Forward Propagation",
-                "description": [
-                    "Input passes through",
-                    "every network layer.",
-                    "",
-                    "a = activation(XW + b)"
-                ]
-            },
-            {
-                "x": 0.235,
-                "color": "#A855F7",
-                "number": "02",
-                "title": "Compute Loss",
-                "description": [
-                    "Compare predictions",
-                    "with actual targets.",
-                    "",
-                    "Loss = MSE(y_pred, y)"
-                ]
-            },
-            {
-                "x": 0.43,
-                "color": "#F472B6",
-                "number": "03",
-                "title": "Backpropagation",
-                "description": [
-                    "Calculate gradients",
-                    "using the chain rule.",
-                    "",
-                    "∂Loss / ∂W"
-                ]
-            },
-            {
-                "x": 0.625,
-                "color": "#F59E0B",
-                "number": "04",
-                "title": "Update Parameters",
-                "description": [
-                    "Optimizer updates",
-                    "weights and biases.",
-                    "",
-                    "W = W - lr × gradient"
-                ]
-            },
-            {
-                "x": 0.82,
-                "color": "#22C55E",
-                "number": "05",
-                "title": "Record & Repeat",
-                "description": [
-                    "Save current loss.",
-                    "Repeat for next epoch.",
-                    "",
-                    "loss_history.append(loss)"
-                ]
-            }
-        ]
-
-        box_width = 0.155
-        box_height = 0.28
-        box_y = 0.43
-
-        for stage in stages:
-
-            x = stage["x"]
-            color = stage["color"]
-
-            # Main card
-            card = FancyBboxPatch(
-                (x, box_y),
-                box_width,
-                box_height,
-                boxstyle="round,pad=0.008,rounding_size=0.015",
-                facecolor='#1E293B',
-                edgecolor=color,
-                linewidth=1.8
-            )
-
-            ax.add_patch(card)
-
-            # Number
-            ax.text(
-                x + box_width / 2,
-                box_y + box_height - 0.045,
-                stage["number"],
-                ha='center', va='center',
-                fontsize=15,
-                fontweight='bold',
-                color=color,
-                family='monospace'
-            )
-
-            # Title
-            ax.text(
-                x + box_width / 2,
-                box_y + box_height - 0.095,
-                stage["title"],
-                ha='center', va='center',
-                fontsize=9,
-                fontweight='bold',
-                color='white',
-                wrap=True
-            )
-
-            # Description
-            ax.text(
-                x + box_width / 2,
-                box_y + 0.09,
-                "\n".join(stage["description"]),
-                ha='center', va='center',
-                fontsize=8,
-                color='#CBD5E1',
-                linespacing=1.6,
-                family='monospace'
-            )
-
-        # ── Arrows between stages ──────────────────────────────
-        for i in range(len(stages) - 1):
-
-            start_x = stages[i]["x"] + box_width + 0.004
-            end_x = stages[i + 1]["x"] - 0.004
-
-            arrow = FancyArrowPatch(
-                (start_x, box_y + box_height / 2),
-                (end_x, box_y + box_height / 2),
-                arrowstyle='-|>',
-                mutation_scale=15,
-                linewidth=1.8,
-                color='#64748B'
-            )
-
-            ax.add_patch(arrow)
-
-        # ── Training loop ──────────────────────────────────────
-        vertices = [
-            (0.897, 0.42),
-            (0.897, 0.30),
-            (0.117, 0.30),
-            (0.117, 0.42)
-        ]
-
-        codes = [
-            Path.MOVETO,
-            Path.LINETO,
-            Path.LINETO,
-            Path.LINETO
-        ]
-
-        loop_path = Path(vertices, codes)
-
-        loop = PathPatch(
-            loop_path,
-            edgecolor='#64748B',
-            facecolor='none',
-            linewidth=1.8,
-            linestyle='--'
-        )
-
-        ax.add_patch(loop)
-
-        # Loop arrow
-        arrow = FancyArrowPatch(
-            (0.117, 0.30),
-            (0.117, 0.42),
-            arrowstyle='-|>',
-            mutation_scale=15,
-            linewidth=1.8,
-            color='#64748B'
-        )
-
-        ax.add_patch(arrow)
-
-        ax.text(
-            0.5, 0.27,
-            "REPEAT UNTIL ITERATIONS ARE COMPLETED",
-            ha='center', va='center',
-            fontsize=9,
-            color='#94A3B8',
-            fontweight='bold',
-            family='monospace'
-        )
-
-        # ── Final result ───────────────────────────────────────
-        result = FancyBboxPatch(
-            (0.25, 0.10), 0.5, 0.09,
-            boxstyle="round,pad=0.01,rounding_size=0.015",
-            facecolor='#1E293B',
-            edgecolor='#22C55E',
-            linewidth=1.5
-        )
-
-        ax.add_patch(result)
-
-        ax.text(
-            0.5, 0.155,
-            "TRAINING COMPLETED",
-            ha='center', va='center',
-            fontsize=12,
-            color='#22C55E',
-            fontweight='bold',
-            family='monospace'
-        )
-
-        ax.text(
-            0.5, 0.12,
-            "Return loss_history",
-            ha='center', va='center',
-            fontsize=9,
-            color='#CBD5E1'
-        )
-
-        # ── Bottom status ──────────────────────────────────────
-        ax.text(
-            0.5, 0.045,
-            "LEARNML | FORWARD → LOSS → BACKWARD → UPDATE → REPEAT",
-            ha='center', va='center',
-            fontsize=9,
-            color='#38BDF8',
-            family='monospace'
-        )
-
-        plt.savefig(
-            "neural_network_training_pipeline.png",
-            dpi=300,
-            bbox_inches='tight',
-            facecolor=fig.get_facecolor()
-        )
-
-        plt.show()
-
-    def fit(self, X, y, learning_rate=0.01, iterations=1000, verbose=True, plot=False):
+    def fit(self, X, y, learning_rate=0.01, iterations=1000, verbose=True, plot=True):
         if self.loss_name is None:
             raise ValueError("Compile the model before training.")
 
@@ -522,6 +226,7 @@ class NeuralNetwork:
             self._backward(dloss)
             self._update(learning_rate, i + 1, optimizer=self.optimizer_name)
             loss_history.append(loss)
+
 
             if verbose:
                 progress = (i + 1) / iterations
@@ -549,6 +254,310 @@ class NeuralNetwork:
         if predictions.shape[1] == 1:
             return (predictions >= 0.5).astype(int).ravel()
         return np.argmax(predictions, axis=1)
+
+
+
+
+
+
+
+    def show_training_plot(self, learning_rate, iterations):
+    
+            fig, ax = plt.subplots(figsize=(16, 9))
+            fig.patch.set_facecolor('#0F172A')
+            ax.set_facecolor('#0F172A')
+    
+            ax.set_xlim(0, 1)
+            ax.set_ylim(0, 1)
+            ax.axis('off')
+    
+            # ── Title ──────────────────────────────────────────────
+            ax.text(
+                0.5, 0.94,
+                "LEARNML | Neural Network Training Pipeline",
+                ha='center', va='center',
+                fontsize=20, fontweight='bold',
+                color='#38BDF8', family='monospace'
+            )
+    
+            ax.text(
+                0.5, 0.895,
+                "How a neural network learns through forward and backward propagation",
+                ha='center', va='center',
+                fontsize=10, color='#94A3B8'
+            )
+    
+            # ── Training information ───────────────────────────────
+            info = [
+                ("OPTIMIZER", self.optimizer_name.upper()),
+                ("LOSS", self.loss_name.upper()),
+                ("ITERATIONS", str(iterations)),
+                ("LEARNING RATE", str(learning_rate))
+            ]
+    
+            info_x = [0.17, 0.39, 0.61, 0.83]
+    
+            for x, (label, value) in zip(info_x, info):
+    
+                box = FancyBboxPatch(
+                    (x - 0.09, 0.79), 0.18, 0.065,
+                    boxstyle="round,pad=0.008,rounding_size=0.01",
+                    facecolor='#1E293B',
+                    edgecolor='#334155',
+                    linewidth=1.2
+                )
+    
+                ax.add_patch(box)
+    
+                ax.text(
+                    x, 0.83, label,
+                    ha='center', va='center',
+                    fontsize=8, color='#94A3B8',
+                    family='monospace'
+                )
+    
+                ax.text(
+                    x, 0.805, value,
+                    ha='center', va='center',
+                    fontsize=10, color='#38BDF8',
+                    fontweight='bold'
+                )
+    
+            # ── Pipeline stages ────────────────────────────────────
+            stages = [
+                {
+                    "x": 0.04,
+                    "color": "#38BDF8",
+                    "number": "01",
+                    "title": "Forward Propagation",
+                    "description": [
+                        "Input passes through",
+                        "every network layer.",
+                        "",
+                        "a = activation(XW + b)"
+                    ]
+                },
+                {
+                    "x": 0.235,
+                    "color": "#A855F7",
+                    "number": "02",
+                    "title": "Compute Loss",
+                    "description": [
+                        "Compare predictions",
+                        "with actual targets.",
+                        "",
+                        "Loss = MSE(y_pred, y)"
+                    ]
+                },
+                {
+                    "x": 0.43,
+                    "color": "#F472B6",
+                    "number": "03",
+                    "title": "Backpropagation",
+                    "description": [
+                        "Calculate gradients",
+                        "using the chain rule.",
+                        "",
+                        "∂Loss / ∂W"
+                    ]
+                },
+                {
+                    "x": 0.625,
+                    "color": "#F59E0B",
+                    "number": "04",
+                    "title": "Update Parameters",
+                    "description": [
+                        "Optimizer updates",
+                        "weights and biases.",
+                        "",
+                        "W = W - lr × gradient"
+                    ]
+                },
+                {
+                    "x": 0.82,
+                    "color": "#22C55E",
+                    "number": "05",
+                    "title": "Record & Repeat",
+                    "description": [
+                        "Save current loss.",
+                        "Repeat for next epoch.",
+                        "",
+                        "loss_history.append(loss)"
+                    ]
+                }
+            ]
+    
+            box_width = 0.155
+            box_height = 0.28
+            box_y = 0.43
+    
+            for stage in stages:
+    
+                x = stage["x"]
+                color = stage["color"]
+    
+                # Main card
+                card = FancyBboxPatch(
+                    (x, box_y),
+                    box_width,
+                    box_height,
+                    boxstyle="round,pad=0.008,rounding_size=0.015",
+                    facecolor='#1E293B',
+                    edgecolor=color,
+                    linewidth=1.8
+                )
+    
+                ax.add_patch(card)
+    
+                # Number
+                ax.text(
+                    x + box_width / 2,
+                    box_y + box_height - 0.045,
+                    stage["number"],
+                    ha='center', va='center',
+                    fontsize=15,
+                    fontweight='bold',
+                    color=color,
+                    family='monospace'
+                )
+    
+                # Title
+                ax.text(
+                    x + box_width / 2,
+                    box_y + box_height - 0.095,
+                    stage["title"],
+                    ha='center', va='center',
+                    fontsize=9,
+                    fontweight='bold',
+                    color='white',
+                    wrap=True
+                )
+    
+                # Description
+                ax.text(
+                    x + box_width / 2,
+                    box_y + 0.09,
+                    "\n".join(stage["description"]),
+                    ha='center', va='center',
+                    fontsize=8,
+                    color='#CBD5E1',
+                    linespacing=1.6,
+                    family='monospace'
+                )
+    
+            # ── Arrows between stages ──────────────────────────────
+            for i in range(len(stages) - 1):
+    
+                start_x = stages[i]["x"] + box_width + 0.004
+                end_x = stages[i + 1]["x"] - 0.004
+    
+                arrow = FancyArrowPatch(
+                    (start_x, box_y + box_height / 2),
+                    (end_x, box_y + box_height / 2),
+                    arrowstyle='-|>',
+                    mutation_scale=15,
+                    linewidth=1.8,
+                    color='#64748B'
+                )
+    
+                ax.add_patch(arrow)
+    
+            # ── Training loop ──────────────────────────────────────
+            vertices = [
+                (0.897, 0.42),
+                (0.897, 0.30),
+                (0.117, 0.30),
+                (0.117, 0.42)
+            ]
+    
+            codes = [
+                Path.MOVETO,
+                Path.LINETO,
+                Path.LINETO,
+                Path.LINETO
+            ]
+    
+            loop_path = Path(vertices, codes)
+    
+            loop = PathPatch(
+                loop_path,
+                edgecolor='#64748B',
+                facecolor='none',
+                linewidth=1.8,
+                linestyle='--'
+            )
+    
+            ax.add_patch(loop)
+    
+            # Loop arrow
+            arrow = FancyArrowPatch(
+                (0.117, 0.30),
+                (0.117, 0.42),
+                arrowstyle='-|>',
+                mutation_scale=15,
+                linewidth=1.8,
+                color='#64748B'
+            )
+    
+            ax.add_patch(arrow)
+    
+            ax.text(
+                0.5, 0.27,
+                "REPEAT UNTIL ITERATIONS ARE COMPLETED",
+                ha='center', va='center',
+                fontsize=9,
+                color='#94A3B8',
+                fontweight='bold',
+                family='monospace'
+            )
+    
+            # ── Final result ───────────────────────────────────────
+            result = FancyBboxPatch(
+                (0.25, 0.10), 0.5, 0.09,
+                boxstyle="round,pad=0.01,rounding_size=0.015",
+                facecolor='#1E293B',
+                edgecolor='#22C55E',
+                linewidth=1.5
+            )
+    
+            ax.add_patch(result)
+    
+            ax.text(
+                0.5, 0.155,
+                "TRAINING COMPLETED",
+                ha='center', va='center',
+                fontsize=12,
+                color='#22C55E',
+                fontweight='bold',
+                family='monospace'
+            )
+    
+            ax.text(
+                0.5, 0.12,
+                "Return loss_history",
+                ha='center', va='center',
+                fontsize=9,
+                color='#CBD5E1'
+            )
+    
+            # ── Bottom status ──────────────────────────────────────
+            ax.text(
+                0.5, 0.045,
+                "LEARNML | FORWARD → LOSS → BACKWARD → UPDATE → REPEAT",
+                ha='center', va='center',
+                fontsize=9,
+                color='#38BDF8',
+                family='monospace'
+            )
+    
+            plt.savefig(
+                "neural_network_training_pipeline.png",
+                dpi=300,
+                bbox_inches='tight',
+                facecolor=fig.get_facecolor()
+            )
+    
+            plt.show()    
 
      # =========================================================
     # VISUALIZE TRAINED NEURAL NETWORK

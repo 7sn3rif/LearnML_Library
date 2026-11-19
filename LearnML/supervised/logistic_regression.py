@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from matplotlib.patches import FancyBboxPatch, FancyArrowPatch
 import matplotlib.patheffects as pe
-import matplotlib.path as Path
+from matplotlib.path import Path
 
 
 
@@ -27,7 +27,7 @@ class LogisticRegression:
   
 
 
-  def fit(self, X, y):
+  def fit(self, X, y, plot=True):
      #Model training :
     
     n_samples, n_features = X.shape #features are the number of columns in the input data, and samples are the number of rows in the input data
@@ -42,10 +42,20 @@ class LogisticRegression:
       #update parameters
       self.weights = self.weights - self.learning_rate * dw
       self.bias = self.bias - self.learning_rate * db
-           
-        
+
+    if plot:
+      self.show_training_plot()
+
+  def predict(self,X):
+    y_predicted = sigmoid(np.dot(X, self.weights) + self.bias)   
+    #the sigmoid fuctions return only values between 0 to 1
     
-    
+    #we need to make it return classes so :
+    class_predicted = np.where(y_predicted > 0.5, 1, 0)
+    return class_predicted
+    #this function will return 1 if the predicted value is greater than 0.5 and 0 otherwise, effectively converting the continuous output of the sigmoid function into binary class labels.
+
+  def show_training_plot(self):
     # ── Figure Setup ──────────────────────────────────────────────────
     fig, ax = plt.subplots(figsize=(9, 11))
     fig.patch.set_facecolor("#0F172A")
@@ -178,17 +188,3 @@ class LogisticRegression:
     
     plt.tight_layout()
     plt.show()
-
-
-
-
-
-
-def predict(self,X):
-    y_predicted = sigmoid(np.dot(X, self.weights) + self.bias)   
-    #the sigmoid fuctions return only values between 0 to 1
-    
-    #we need to make it return classes so :
-    class_predicted = np.where(y_predicted > 0.5, 1, 0)
-    return class_predicted
-    #this function will return 1 if the predicted value is greater than 0.5 and 0 otherwise, effectively converting the continuous output of the sigmoid function into binary class labels.

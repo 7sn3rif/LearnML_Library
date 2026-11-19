@@ -15,7 +15,7 @@ class LinearRegression:
     self.bias = None
 
 
-  def fit(self, X, y):
+  def fit(self, X, y, plot=True):
     #Model training
     n_samples, n_features = X.shape #features are the number of columns in the input data, and samples are the number of rows in the input data
     self.weights = np.zeros(n_features)
@@ -32,7 +32,14 @@ class LinearRegression:
       #until here , the algorithm is a standard implementation of linear regression using gradient descent. and the rest of the code is for visualization purposes, and it is not part of the core algorithm.
       #the following code generates a graphical representation of the linear regression training pipeline, illustrating the steps involved in the process.
 
-    
+    if plot:
+      self.show_training_plot()
+
+  def predict(self, X ):
+    y_predicted = np.dot(X, self.weights) + self.bias
+    return y_predicted
+
+  def show_training_plot(self):
     #graphical representation of the model training      
     fig, ax = plt.subplots(figsize=(9, 11))
     fig.patch.set_facecolor("#0F172A")
@@ -154,10 +161,6 @@ class LinearRegression:
                 facecolor="#0F172A")
     plt.show()
 
-  def predict(self, X ):
-    y_predicted = np.dot(X, self.weights) + self.bias
-    return y_predicted
-
 
 
 
@@ -201,12 +204,23 @@ class PolynomialRegression:
               self.bias = self.bias - self.learning_rate * db
     
 
-    def fit(self, X, y):
+    def fit(self, X, y, plot=True):
         X_poly = self._polynomial_features(X)
         self._linear_model(X_poly, y) #same as linear regression, but we use the polynomial features instead of the original features. This allows us to fit a polynomial regression model to the data.
         #now, the model is trained using the polynomial features, and we can use it to make predictions on new data.
         #the rest of the code is for visualization purposes, and it is not part of the core algorithm.
 
+        if plot:
+            self.show_training_plot()
+        
+        
+    def predict(self, X):
+             #same as linear regression, but we use the polynomial features instead of the original features. This allows us to make predictions using the trained polynomial regression model.
+             X_poly = self._polynomial_features(X)
+             y_predicted = np.dot(X_poly, self.weights) + self.bias
+             return y_predicted
+
+    def show_training_plot(self):
         #graphical representation of the polynomial regression training pipeline, illustrating the steps involved in the process.
         fig, ax = plt.subplots(figsize=(9, 12))
         fig.patch.set_facecolor("#0F172A")
@@ -372,10 +386,3 @@ class PolynomialRegression:
         plt.savefig("polynomial_regression_pipeline.png", dpi=150,
                     bbox_inches="tight", facecolor="#0F172A")
         plt.show()
-        
-        
-    def predict(self, X):
-             #same as linear regression, but we use the polynomial features instead of the original features. This allows us to make predictions using the trained polynomial regression model.
-             X_poly = self._polynomial_features(X)
-             y_predicted = np.dot(X_poly, self.weights) + self.bias
-             return y_predicted

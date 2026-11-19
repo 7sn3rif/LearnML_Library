@@ -131,129 +131,12 @@ class DecisionTree:
    right=self._grow_tree(X[right_idxs,:],y[right_idxs],depth+1)
    return Node(best_feature,best_threshold,left,right)
 
-  def fit(self, X, y):
+  def fit(self, X, y, plot=True):
     #read the number of features
     self.n_features=X.shape[1] if not self.n_features else min(X.shape[1],self.n_features)
     self.root=self._grow_tree(X,y)
-    # Graphical representation of the Decision Tree model training
-    fig, ax = plt.subplots(figsize=(9, 11))
-    fig.patch.set_facecolor("#0F172A")
-    ax.set_facecolor("#0F172A")
-    ax.set_xlim(0, 1)
-    ax.set_ylim(0, 1)
-    ax.axis("off")
-    
-    # ── Header ──────────────────────────────────────────────────────────
-    header = FancyBboxPatch((0.12, 0.905), 0.76, 0.065,
-        boxstyle="round,pad=0.01", facecolor="#1E293B",
-        edgecolor="#38BDF8", linewidth=1.5, zorder=2)
-    ax.add_patch(header)
-    ax.text(0.5, 0.938, "LEARNML  |  CART Decision Tree Pipeline",
-        ha="center", va="center", fontsize=13, fontweight="bold",
-        color="#F8FAFC", fontfamily="monospace", zorder=3)
-    
-    # ── Step definitions ─────────────────────────────────────────────────
-    steps = [
-        {"y": 0.775, "title": "1. Check Stopping Criteria",
-         "sub": "depth >= max_depth  |  n_samples < min_split",
-         "color": "#38BDF8", "edge": "#0284C7"},
-        {"y": 0.615, "title": "2. Evaluate Split Candidates",
-         "sub": "Iterate feature columns & unique thresholds",
-         "color": "#A855F7", "edge": "#7E22CE"},
-        {"y": 0.455, "title": "3. Compute Impurity & Gain",
-         "sub": "Gain = Impurity(y) − Σ (n_i/N) · Impurity(y_i)",
-         "color": "#EC4899", "edge": "#BE185D"},
-        {"y": 0.295, "title": "4. Split Data & Recurse",
-         "sub": "left_child = _grow_tree(X_left, y_left)",
-         "color": "#F59E0B", "edge": "#B45309"},
-        {"y": 0.115, "title": "5. Return Leaf Node",
-         "sub": "Predict majority class: _most_common_label(y)",
-         "color": "#10B981", "edge": "#059669"},
-    ]
-    
-    card_w, card_h = 0.60, 0.095
-    
-    for step in steps:
-        cy = step["y"]
-        x0 = 0.5 - card_w / 2
-        y0 = cy - card_h / 2
-    
-        # Card shadow
-        shadow = FancyBboxPatch((x0 + 0.006, y0 - 0.006), card_w, card_h,
-            boxstyle="round,pad=0.012", facecolor="#000000",
-            edgecolor="none", alpha=0.4, zorder=2)
-        ax.add_patch(shadow)
-    
-        # Card body
-        card = FancyBboxPatch((x0, y0), card_w, card_h,
-            boxstyle="round,pad=0.012", facecolor="#1E293B",
-            edgecolor=step["edge"], linewidth=2, zorder=3)
-        ax.add_patch(card)
-    
-        # Colored left accent bar
-        accent = FancyBboxPatch((x0, y0), 0.012, card_h,
-            boxstyle="round,pad=0.0", facecolor=step["color"],
-            edgecolor="none", zorder=4)
-        ax.add_patch(accent)
-    
-        # Title
-        ax.text(0.5, cy + 0.018, step["title"],
-            ha="center", va="center", fontsize=11.5, fontweight="bold",
-            color=step["color"], fontfamily="sans-serif", zorder=5)
-    
-        # Formula / subtitle
-        ax.text(0.5, cy - 0.022, step["sub"],
-            ha="center", va="center", fontsize=10,
-            color="#94A3B8", fontfamily="monospace", zorder=5)
-    
-    # ── Vertical arrows ──────────────────────────────────────────────────
-    gap = 0.012
-    arrow_pairs = [
-        (steps[i]["y"] - card_h / 2 - gap, steps[i+1]["y"] + card_h / 2 + gap)
-        for i in range(len(steps) - 1)
-    ]
-    
-    for y_start, y_end in arrow_pairs:
-        ax.annotate("", xy=(0.5, y_end), xytext=(0.5, y_start),
-            arrowprops=dict(arrowstyle="-|>", color="#64748B",
-                            lw=1.8, mutation_scale=16),
-            zorder=3)
-    
-    # ── Recursive loop arc (Step 4 → Step 1) ────────────────────────────
-    
-    # Dashed curved path via bezier control points
-    loop_x = [0.81, 0.96, 0.81]
-    loop_y = [steps[3]["y"], 0.535, steps[0]["y"]]
-    
-    verts = [
-        (loop_x[0], loop_y[0]),
-        (loop_x[1], loop_y[1]),
-        (loop_x[2], loop_y[2]),
-    ]
-    codes = [Path.MOVETO, Path.CURVE3, Path.CURVE3]
-    path = Path(verts, codes)
-    patch = mpatches.PathPatch(path, facecolor="none",
-        edgecolor="#F59E0B", linewidth=2,
-        linestyle=(0, (5, 4)), zorder=3)
-    ax.add_patch(patch)
-    
-    # Arrowhead at end of arc
-    ax.annotate("", xy=(0.812, steps[0]["y"]), xytext=(0.83, steps[0]["y"] + 0.03),
-        arrowprops=dict(arrowstyle="-|>", color="#F59E0B",
-                        lw=1.5, mutation_scale=14), zorder=4)
-    
-    # Loop label
-    ax.text(0.965, 0.535, "Recursive\nLoop",
-        ha="left", va="center", fontsize=9.5, fontweight="bold",
-        color="#F59E0B", fontfamily="monospace", zorder=5)
-    ax.text(0.965, 0.495, "until leaf\nnode hit",
-        ha="left", va="center", fontsize=8.5,
-        color="#64748B", fontfamily="monospace", zorder=5)
-    
-    plt.tight_layout()
-    plt.savefig("decision_tree_pipeline.png", dpi=150, bbox_inches="tight",
-                facecolor="#0F172A")
-    plt.show()
+    if plot:
+        self.show_training_plot()
 
 #helper method to traverse the decision tree for a given input sample, returning the predicted value or class label based on the splits defined by the tree nodes.
   def _traverse_tree(self, x , node):
@@ -614,28 +497,123 @@ class DecisionTree:
 
     plt.show()
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  def show_training_plot(self):
+    # Graphical representation of the Decision Tree model training
+    fig, ax = plt.subplots(figsize=(9, 11))
+    fig.patch.set_facecolor("#0F172A")
+    ax.set_facecolor("#0F172A")
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+    ax.axis("off")
+    
+    # ── Header ──────────────────────────────────────────────────────────
+    header = FancyBboxPatch((0.12, 0.905), 0.76, 0.065,
+        boxstyle="round,pad=0.01", facecolor="#1E293B",
+        edgecolor="#38BDF8", linewidth=1.5, zorder=2)
+    ax.add_patch(header)
+    ax.text(0.5, 0.938, "LEARNML  |  CART Decision Tree Pipeline",
+        ha="center", va="center", fontsize=13, fontweight="bold",
+        color="#F8FAFC", fontfamily="monospace", zorder=3)
+    
+    # ── Step definitions ─────────────────────────────────────────────────
+    steps = [
+        {"y": 0.775, "title": "1. Check Stopping Criteria",
+         "sub": "depth >= max_depth  |  n_samples < min_split",
+         "color": "#38BDF8", "edge": "#0284C7"},
+        {"y": 0.615, "title": "2. Evaluate Split Candidates",
+         "sub": "Iterate feature columns & unique thresholds",
+         "color": "#A855F7", "edge": "#7E22CE"},
+        {"y": 0.455, "title": "3. Compute Impurity & Gain",
+         "sub": "Gain = Impurity(y) − Σ (n_i/N) · Impurity(y_i)",
+         "color": "#EC4899", "edge": "#BE185D"},
+        {"y": 0.295, "title": "4. Split Data & Recurse",
+         "sub": "left_child = _grow_tree(X_left, y_left)",
+         "color": "#F59E0B", "edge": "#B45309"},
+        {"y": 0.115, "title": "5. Return Leaf Node",
+         "sub": "Predict majority class: _most_common_label(y)",
+         "color": "#10B981", "edge": "#059669"},
+    ]
+    
+    card_w, card_h = 0.60, 0.095
+    
+    for step in steps:
+        cy = step["y"]
+        x0 = 0.5 - card_w / 2
+        y0 = cy - card_h / 2
+    
+        # Card shadow
+        shadow = FancyBboxPatch((x0 + 0.006, y0 - 0.006), card_w, card_h,
+            boxstyle="round,pad=0.012", facecolor="#000000",
+            edgecolor="none", alpha=0.4, zorder=2)
+        ax.add_patch(shadow)
+    
+        # Card body
+        card = FancyBboxPatch((x0, y0), card_w, card_h,
+            boxstyle="round,pad=0.012", facecolor="#1E293B",
+            edgecolor=step["edge"], linewidth=2, zorder=3)
+        ax.add_patch(card)
+    
+        # Colored left accent bar
+        accent = FancyBboxPatch((x0, y0), 0.012, card_h,
+            boxstyle="round,pad=0.0", facecolor=step["color"],
+            edgecolor="none", zorder=4)
+        ax.add_patch(accent)
+    
+        # Title
+        ax.text(0.5, cy + 0.018, step["title"],
+            ha="center", va="center", fontsize=11.5, fontweight="bold",
+            color=step["color"], fontfamily="sans-serif", zorder=5)
+    
+        # Formula / subtitle
+        ax.text(0.5, cy - 0.022, step["sub"],
+            ha="center", va="center", fontsize=10,
+            color="#94A3B8", fontfamily="monospace", zorder=5)
+    
+    # ── Vertical arrows ──────────────────────────────────────────────────
+    gap = 0.012
+    arrow_pairs = [
+        (steps[i]["y"] - card_h / 2 - gap, steps[i+1]["y"] + card_h / 2 + gap)
+        for i in range(len(steps) - 1)
+    ]
+    
+    for y_start, y_end in arrow_pairs:
+        ax.annotate("", xy=(0.5, y_end), xytext=(0.5, y_start),
+            arrowprops=dict(arrowstyle="-|>", color="#64748B",
+                            lw=1.8, mutation_scale=16),
+            zorder=3)
+    
+    # ── Recursive loop arc (Step 4 → Step 1) ────────────────────────────
+    
+    # Dashed curved path via bezier control points
+    loop_x = [0.81, 0.96, 0.81]
+    loop_y = [steps[3]["y"], 0.535, steps[0]["y"]]
+    
+    verts = [
+        (loop_x[0], loop_y[0]),
+        (loop_x[1], loop_y[1]),
+        (loop_x[2], loop_y[2]),
+    ]
+    codes = [Path.MOVETO, Path.CURVE3, Path.CURVE3]
+    path = Path(verts, codes)
+    patch = mpatches.PathPatch(path, facecolor="none",
+        edgecolor="#F59E0B", linewidth=2,
+        linestyle=(0, (5, 4)), zorder=3)
+    ax.add_patch(patch)
+    
+    # Arrowhead at end of arc
+    ax.annotate("", xy=(0.812, steps[0]["y"]), xytext=(0.83, steps[0]["y"] + 0.03),
+        arrowprops=dict(arrowstyle="-|>", color="#F59E0B",
+                        lw=1.5, mutation_scale=14), zorder=4)
+    
+    # Loop label
+    ax.text(0.965, 0.535, "Recursive\nLoop",
+        ha="left", va="center", fontsize=9.5, fontweight="bold",
+        color="#F59E0B", fontfamily="monospace", zorder=5)
+    ax.text(0.965, 0.495, "until leaf\nnode hit",
+        ha="left", va="center", fontsize=8.5,
+        color="#64748B", fontfamily="monospace", zorder=5)
+    
+    plt.tight_layout()
+    plt.savefig("decision_tree_pipeline.png", dpi=150, bbox_inches="tight",
+                facecolor="#0F172A")
+    plt.show()

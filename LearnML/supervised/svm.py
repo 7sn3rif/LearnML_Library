@@ -12,7 +12,7 @@ class LinearSVM:
         self.w = None
         self.b = None
 
-    def fit(self, X, y):
+    def fit(self, X, y, plot=True):
         n_samples, n_features = X.shape
         self.w = np.zeros(n_features)
         self.b = 0
@@ -33,6 +33,14 @@ class LinearSVM:
                     self.w -= self.learning_rate * (2 * self.lambda_param * self.w - y_[idx] * x_i)
                     self.b += self.learning_rate * y_[idx]
 
+        if plot:
+            self.show_training_plot()
+
+    def predict(self, X):
+        linear_output = np.dot(X, self.w) + self.b
+        return np.sign(linear_output)
+
+    def show_training_plot(self):
         # ── Graphical representation of the Linear SVM training pipeline ──
         fig, ax = plt.subplots(figsize=(9, 11))
         fig.patch.set_facecolor("#0F172A")
@@ -150,7 +158,3 @@ class LinearSVM:
         plt.savefig("linear_svm_pipeline.png", dpi=150, bbox_inches="tight",
                     facecolor="#0F172A")
         plt.show()
-
-    def predict(self, X):
-        linear_output = np.dot(X, self.w) + self.b
-        return np.sign(linear_output)
