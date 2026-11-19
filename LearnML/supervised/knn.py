@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from matplotlib.patches import FancyBboxPatch, FancyArrowPatch
 import matplotlib.patheffects as pe
-import matplotlib.path as Path
+from matplotlib.path import Path
 from collections import Counter
 
 
@@ -28,6 +28,46 @@ class KNN:
         return self.minkowski_distance(x1, x2, p)
     else:
         raise ValueError(f"Unknown distance metric: {self.distance}")
+
+ 
+ def fit(self , X , y , plot=True): 
+    self.X_train = X
+    self.y_train = y
+
+    if plot:
+        self.show_training_plot()
+    else:    
+        print("Training complete. Model is ready to make predictions.")
+   
+
+
+ def predict(self , X):
+   predictions = np.array([self._predict_one(x) for x in X])
+   return predictions
+ 
+
+ def _predict_one(self , x):
+  #compute the distance
+  distances = [self._compute_distance(x , x_train) for x_train in self.X_train]
+
+  #get the closest k
+  k_indices = np.argsort(distances)[:self.k] # Get the indices of the k nearest points via slicing:
+# np.argsort(distances) sorts all distances and returns their indices in ascending order.
+# [:self.k] slices the first k indices, giving us the k closest neighbors
+  
+#compare to y   
+  k_nearest_labels = [self.y_train[i] for i in k_indices]
+
+
+# Majority vote
+  try:
+      # Fast path: works if labels are integers
+      most_common_label = np.bincount(k_nearest_labels).argmax()
+  except Exception:
+      # Fallback: works for strings or mixed labels
+      most_common_label = Counter(k_nearest_labels).most_common(1)[0][0]
+  return most_common_label
+
 
  def show_training_plot(self):   
  #graphical representation of the model pipeline
@@ -89,7 +129,7 @@ class KNN:
         },
     ]
 
-    card_w, card_h = 0.60, 0.095
+    card_w, card_h = 0.54, 0.095
 
     for step in steps:
         cy = step["y"]
@@ -136,10 +176,11 @@ class KNN:
     # ── Per-query-point loop arc (Step 5 → Step 2) ───────────────────
     # predict() calls predict_one(x) for every x in X
     # so steps 2 → 3 → 4 → 5 repeat for each new query point
+    right_x = 0.5 + card_w / 2 + 0.012
     verts = [
-        (0.81, steps[4]["y"]),   # start: right edge of step 5
-        (0.96, steps[2]["y"]),   # bezier control point
-        (0.81, steps[1]["y"]),   # end: right edge of step 2
+        (right_x, steps[4]["y"]),   # start: right edge of step 5
+        (0.84, steps[2]["y"]),      # bezier control point
+        (right_x, steps[1]["y"]),   # end: right edge of step 2
     ]
     codes = [Path.MOVETO, Path.CURVE3, Path.CURVE3]
     ax.add_patch(mpatches.PathPatch(
@@ -147,75 +188,17 @@ class KNN:
         edgecolor="#F59E0B", linewidth=2,
         linestyle=(0, (5, 4)), zorder=3))
 
-    ax.annotate("", xy=(0.812, steps[1]["y"]),
-        xytext=(0.83, steps[1]["y"] + 0.03),
+    ax.annotate("", xy=(right_x + 0.002, steps[1]["y"]),
+        xytext=(right_x + 0.02, steps[1]["y"] + 0.03),
         arrowprops=dict(arrowstyle="-|>", color="#F59E0B",
                         lw=1.5, mutation_scale=14), zorder=4)
 
-    ax.text(0.965, steps[2]["y"] + 0.025, "Per query\npoint",
+    ax.text(0.845, steps[2]["y"] + 0.025, "Per query\npoint",
         ha="left", va="center", fontsize=9.5, fontweight="bold",
         color="#F59E0B", fontfamily="monospace", zorder=5)
-    ax.text(0.965, steps[2]["y"] - 0.025, "repeats for\neach x in X",
+    ax.text(0.845, steps[2]["y"] - 0.025, "repeats for\neach x in X",
         ha="left", va="center", fontsize=8.5,
         color="#64748B", fontfamily="monospace", zorder=5)
 
     plt.tight_layout()
     plt.show()
-
-
- def fit(self , X , y , plot=True): 
-    self.X_train = X
-    self.y_train = y
-
-    if plot:
-        self.show_training_plot()
-    else:    
-        print("Training complete. Model is ready to make predictions.")
-   
-
-
- def predict(self , X):
-   predictions = np.array([self._predict_one(x) for x in X])
-   return predictions
- 
-
- def _predict_one(self , x):
-  #compute the distance
-  distances = [self._compute_distance(x , x_train) for x_train in self.X_train]
-
-  #get the closest k
-  k_indices = np.argsort(distances)[:self.k] # Get the indices of the k nearest points via slicing:
-# np.argsort(distances) sorts all distances and returns their indices in ascending order.
-# [:self.k] slices the first k indices, giving us the k closest neighbors
-  
-#compare to y   
-  k_nearest_labels = [self.y_train[i] for i in k_indices]
-
-
-# Majority vote
-  try:
-      # Fast path: works if labels are integers
-      most_common_label = np.bincount(k_nearest_labels).argmax()
-  except Exception:
-      # Fallback: works for strings or mixed labels
-      most_common_label = Counter(k_nearest_labels).most_common(1)[0][0]
-  return most_common_label
-
-
-
-
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-    

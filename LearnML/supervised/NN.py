@@ -7,6 +7,7 @@ from matplotlib.patches import FancyBboxPatch, FancyArrowPatch, Circle, PathPatc
 import matplotlib.patheffects as pe
 from matplotlib.path import Path
 
+
 def sigmoid(z):
     return 1 / (1 + np.exp(-z))
 
@@ -210,35 +211,7 @@ class NeuralNetwork:
         for layer in self.layers:
             layer.update(learning_rate, t, optimizer)
 
-    def fit(self, X, y, learning_rate=0.01, iterations=1000, verbose=True):
-        if self.loss_name is None:
-            raise ValueError("Compile the model before training.")
-
-        loss_history = []
-        bar_length = 30
-
-        for i in range(iterations):
-            predictions = self._forward(X)
-            loss, dloss = self._compute_loss(predictions, y)
-            self._backward(dloss)
-            self._update(learning_rate, i + 1, optimizer=self.optimizer_name)
-            loss_history.append(loss)
-
-            if verbose:
-                progress = (i + 1) / iterations
-                filled = int(bar_length * progress)
-                bar = "=" * filled + ">" + "." * (bar_length - filled - 1)
-                sys.stdout.write(
-                    f"\rEpoch {i+1}/{iterations} [{bar}] - loss: {loss:.4f}"
-                )
-                sys.stdout.flush()
-
-        if verbose:
-            print()
-
-        # ============================================================
-        # GRAPHICAL REPRESENTATION OF NEURAL NETWORK TRAINING
-        # ============================================================
+    def show_training_plot(self, learning_rate, iterations):
 
         fig, ax = plt.subplots(figsize=(16, 9))
         fig.patch.set_facecolor('#0F172A')
@@ -535,6 +508,35 @@ class NeuralNetwork:
         )
 
         plt.show()
+
+    def fit(self, X, y, learning_rate=0.01, iterations=1000, verbose=True, plot=False):
+        if self.loss_name is None:
+            raise ValueError("Compile the model before training.")
+
+        loss_history = []
+        bar_length = 30
+
+        for i in range(iterations):
+            predictions = self._forward(X)
+            loss, dloss = self._compute_loss(predictions, y)
+            self._backward(dloss)
+            self._update(learning_rate, i + 1, optimizer=self.optimizer_name)
+            loss_history.append(loss)
+
+            if verbose:
+                progress = (i + 1) / iterations
+                filled = int(bar_length * progress)
+                bar = "=" * filled + ">" + "." * (bar_length - filled - 1)
+                sys.stdout.write(
+                    f"\rEpoch {i+1}/{iterations} [{bar}] - loss: {loss:.4f}"
+                )
+                sys.stdout.flush()
+
+        if verbose:
+            print()
+
+        if plot:
+            self.show_training_plot(learning_rate, iterations)
 
         return loss_history
 
@@ -863,5 +865,4 @@ class NeuralNetwork:
             facecolor="#0F172A"
         )
 
-        plt.show()     
-
+        plt.show()
